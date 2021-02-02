@@ -206,8 +206,15 @@ public static int[] getArray() {
 + C++实现
 
 ```C++
+//方法一
 int *getArray(){
     int *arr = new int[5] {1, 3, 5, 7, 9};
+    return arr;
+}
+//方法二
+int *getArray()
+{
+    static int arr[] = {1,3,5,7,9};
     return arr;
 }
 int main(){
