@@ -87,5 +87,121 @@ public class Java{
 |     `Ctrl + Alt + L`     |      格式化代码      |
 | `Alt + Shift + 上下箭头` |    移动当前代码行    |
 
+------
+
+### 1.6 Java虚拟机的内存划分
+
+| 五大区                           | 介绍                                                         |
+| -------------------------------- | ------------------------------------------------------------ |
+| 栈（Stack）                      | 存放方法中的局部变量（方法的参数、方法内部的变量、方法的运行），一旦超出作用域，立刻从栈中消失 |
+| 堆（Heap）                       | new出的对象，都有地址值和默认值                              |
+| 方法区（Method Area)             | 存储class相关信息                                            |
+| 本地方法栈（Native Method Stack) | JVM在使用操作系统功能的时候使用，和我们开发无关              |
+| 寄存器(Pc Register)              | 给CPU使用，和我们开发无关                                    |
+
+## 2 数组
+
+------
+
+### 2.1 定义
+
++ 格式1：
+
+  ```java
+  数据类型[] 数组名字 = new 数据类型[长度];
+  int[] arr = new int[3];
+  ```
+
++ 格式2：
+
+  ```java
+  数据类型[] 数组名 = new 数据类型[]{元素1,元素2,元素3...};
+  int[] arr = new int[]{1,2,3,4,5};
+  ```
+
++ 格式3：
+
+  ```java
+  数据类型[] 数组名 = {元素1,元素2,元素3...};
+  int[] arr = {1,2,3,4,5};
+  ```
+
+### 2.2 数组的访问
+
++ 数组默认值
+
+```java
+整型：默认 0
+浮点型：默认 0.0
+字符型：默认 ‘\u0000’
+布尔型：默认 false
+引用型：默认 null
+```
+
++ `数组名.length`
+
+```java
+public static void main(String[] args) {
+		int[] arr = new int[]{1,2,3,4,5};
+		//打印数组的属性，输出结果是5
+		System.out.println(arr.length);
+}
+```
+
+### 2.3 数组最大值
+
+```java
+public static void main(String[] args) {
+    int[] arr = {5, 15, 2000, 10000, 100, 4000};
+    //定义变量，保存数组中0索引的元素
+    int max = arr[0];
+    //遍历数组，取出每个元素
+    for (int i = 0; i < arr.length; i++) {
+    	//遍历到的元素和变量max比较
+    	//如果数组元素大于max
+    	if (arr[i] > max) {
+				//max记录住大值
+				max = arr[i];
+    	}
+  	}
+  System.out.println("数组最大值是： " + max);
+}
+```
+
+### 2.4 数组反转
+
+```java
+public static void main(String[] args) {
+		int[] arr = {1, 2, 3, 4, 5};
+    for (int min = 0, max = arr.length - 1; min < max; min++, max--) {
+       //利用第三方变量完成数组中的元素交换
+			 int temp = arr[min];
+       arr[min] = arr[max];
+       arr[max] = temp;
+     }
+     // 反转后，遍历数组
+     for (int i = 0; i < arr.length; i++) {
+       System.out.println(arr[i]);
+     }
+}
+```
+
+### 2.5 数组作为方法返回值
+
++ 数组作为方法的返回值，返回的是数组的内存地址
+
+```java
+public static void main(String[] args) {
+    int[] arr = getArray();
+    for (int i = 0; i < arr.length; i++) {
+       System.out.println(arr[i]);
+    }
+}
+public static int[] getArray() {
+    int[] arr = {1, 3, 5, 7, 9};
+    return arr;
+}
+```
+
 
 
