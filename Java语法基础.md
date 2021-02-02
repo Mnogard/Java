@@ -203,5 +203,21 @@ public static int[] getArray() {
 }
 ```
 
++ C++实现
+
+```C++
+int *getArray(){
+    int *arr = new int[5] {1, 3, 5, 7, 9};
+    return arr;
+}
+int main(){
+    int *arr1 = getArray();
+    for(int i = 0; i < 5; i++){
+        cout << arr1[i] << endl;
+    }
+    return 0;
+}
+```
+
 
 
