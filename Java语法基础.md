@@ -226,5 +226,332 @@ int main(){
 }
 ```
 
+## 3 面向对象（三大特性）
 
+------
+
+### 3.1 对象的调用
+
+```java
+public class Student {
+    String name;
+    int age;
+
+    public void eat(){
+        System.out.println("吃饭饭");
+    }
+
+    public void sleep(){
+        System.out.println("睡觉觉");
+    }
+
+    public void study(){
+        System.out.println("学习");
+    }
+}
+--------------------------------------------------
+/*
+导包：
+import 包名称.类名称;
+如果属于同一个包，可省略不写
+
+创建：
+类名称 对象名 = new 类名称();
+*/
+
+public class DemoStudent {
+    public static void main(String[] args) {
+        Student stu = new Student();
+
+        //使用成员变量
+        stu.name = "帆仔";
+        stu.age = 18;
+        System.out.println(stu.name);
+        System.out.println(stu.age);
+
+        //使用成员方法
+        stu.eat();
+        stu.sleep();
+        stu.study();
+    }
+}
+```
+
+有一个对象作为参数，传递到方法当中时，实际上传递进去的是对象的 **`地址值`**
+
+------
+
+### 3.2 局部变量 & 成员变量
+
+|   变量   |  初始值  | 内存位置 |               生命周期               |
+| :------: | :------: | :------: | :----------------------------------: |
+| 成员变量 | 有默认值 |  堆内存  |   随着对象的创建而存在，消失而消失   |
+| 局部变量 | 无默认值 |  栈内存  | 随着方法的调用而存在，方法调用完消失 |
+
+------
+
+### 3.3 标准代码 -- Java Bean
+
+`Java Bean` 是 `Java`语言编写类的一种标准规范。符合 `Java Bean` 的类，要求类必须是具体的和公共的，并且具有无参数的构造方法，提供用来操作成员变量的 `set` 和 `get` 方法
+
+```java
+public class ClassName{
+//成员变量
+//构造方法
+//无参构造方法【必须】
+//有参构造方法【建议】
+//成员方法
+//getXxx()
+//setXxx()
+//isXxx()  boolean获取用is
+}
+```
+
+----
+
+### 3.4 封装
+
++ **this使用：**区分重名`（通过谁调用的方法，谁就是this）`
+
+```java
+public class Person {
+    private String name;
+    private boolean male;  //性别
+
+    public void setMale(boolean male) {   //设置用set
+        this.male = male;
+    }
+
+    public boolean isMale() {   //性别的获取用is，其他用get
+        return male;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+```
+
++ **构造方法**（相当于C++构造函数：不写void、不可返回值）
+
+```java
+修饰符 构造方法名(参数列表) {
+// 方法体
+}
+```
+
+```java
+public class Student {
+    private String name;
+    private int age;
+    // 无参数构造方法（new对象调用 Person p = new Person();）
+    public Student() {}
+    // 有参数构造方法
+    public Student(String name,int age) {
+        this.name = name;
+        this.age = age;
+    }
+}
+```
+
+**例子：**
+
+```java
+//person.java
+public class Person {
+    private String name;
+    private int age;
+    private boolean male;  //性别
+
+    // 无参数构造方法
+    public Person() {
+        System.out.println("调用无参构造！");
+    }
+    // 有参数构造方法
+    public Person(String name,int age,boolean male) {
+        System.out.println("调用全参构造！");
+        this.name = name;
+        this.age = age;
+        this.male = male;
+    }
+
+    //如果需要修改对象中成员变量的数据内容，仍需要set
+    public void setMale(boolean male) {
+        this.male = male;
+    }
+
+    public boolean isMale() {
+        return male;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public int getAge() {
+        return age;
+    }
+}
+
+```
+
+```java
+//DemoPerson.java
+public class DemoPerson {
+    public static void main(String[] args) {
+        Person p = new Person();   //调用无餐构造
+        Person p1 = new Person("呆呆",19,false);  //调用全参构造
+
+        p.setName("帆仔");
+        p.setAge(18);
+        p.setMale(true);
+
+        System.out.println("姓名: " + p.getName());
+        System.out.println("年龄: " + p.getAge());
+        System.out.println("是不是男孩纸: " + p.isMale());
+    }
+}
+```
+
+运行结果：
+
+```java
+调用无参构造！
+调用全参构造！
+姓名: 帆仔
+年龄: 18
+是不是男孩纸: true
+Process finished with exit code 0
+```
+
+## 4 常用类
+
+------
+
+### 4.1 Scanner 类
+
+使用Scanner类，完成接收键盘录入数据的操作，代码如下：
+
+```java
+import java.util.Scanner;    //导包（只有java.lang包下的内容不需要导包）
+
+public class DemoScanner {
+    public static void main(String[] args) {
+
+        //System.in代表从键盘进行输入
+        Scanner sc = new Scanner(System.in);
+
+        //获取键盘输入的一个int数字
+        int num = sc.nextInt();
+        System.out.println("输入的Int数字是：" + num);
+
+        //获取键盘输入的一个字符串
+        String str = sc.next();
+        System.out.println("输入的字符串是：" + str);
+    }
+}
+```
+
+---
+
+### 4.2 Random 类
+
+此类的实例用于生成伪随机数
+
+```java
+import java.util.Random;
+
+public class DemoRandom {
+    public static void main(String[] args) {
+        Random r = new Random();   //获取一个随机数
+
+        int num = r.nextInt();
+        System.out.println(num);
+
+        int num1 = r.nextInt(10);  //获取一个 [0,10) 的随机数
+        System.out.println(num1);
+    }
+}
+```
+
+---
+
+### 4.3 ArrayList 类
+
+ArrayList 是大小可变的数组的实现（数组必须定义大小，一旦定义不可变化）
+
++ `public boolean add(E e)` ：将指定的元素添加到此集合的尾部。
++ `public E remove(int index)` ：移除此集合中指定位置上的元素，返回被删除的元素。
++ `public E get(int index)` ：返回此集合中指定位置上的元素，返回获取的元素。
++ `public int size()` ：返回此集合中的元素数。遍历集合时，可以控制索引范围，防止越界。
+
+```java
+import java.util.ArrayList;
+
+public class DemoArrayList {
+    public static void main(String[] args) {
+        ArrayList<String> list = new ArrayList<>();
+        System.out.println(list);  //如果list内容为空，直接打印得到的不是地址值，而是[]
+
+        //添加元素
+        list.add("呆呆");
+        list.add("帆仔");
+        System.out.println(list);
+
+        //public E get(int index):返回指定索引处的元素
+        System.out.println("get: "+list.get(0));
+        System.out.println("get: "+list.get(1));
+
+        //public int size():返回集合中的元素的个数
+        System.out.println("size: "+list.size());
+
+        //public E remove(int index):删除指定索引处的元素，返回被删除的元素
+        System.out.println("remove: "+list.remove(0));
+
+        //遍历输出
+        for(int i = 0; i < list.size(); i++){
+            System.out.println(list.get(i));
+        }
+    }
+}
+```
+
+运行结果：
+
+```java
+[]
+[呆呆, 帆仔]
+get: 呆呆
+get: 帆仔
+size: 2
+remove: 呆呆
+帆仔
+Process finished with exit code 0
+```
+
++ 其他数据类型的ArrayList
+
+ArrayList对象不能存储基本类型，只能存储引用类型的数据。类似 `<int>` 不能写，但是存储基本数据类型对应的包装类型是可以的。所以，想要存储基本类型数据， `<>` 中的数据类型，必须转换后才能编写，转换写法如下：
+
+| 基本类型 | 包装类型  |
+| :------: | :-------: |
+|   byte   |   Byte    |
+|  short   |   Short   |
+|   int    |  Integer  |
+|   long   |   Long    |
+|  double  |  Double   |
+|   char   | Character |
+| boolean  |  Boolean  |
 

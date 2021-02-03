@@ -1,14 +1,13 @@
-package cn.text1;
+package cn.text2;
 
-//command + n : 自动生成代码
-public class practice {
-    String name;
-    int age;
+public class Student {
+    private String name;
+    private int age;
 
-    public practice() {
+    public Student() {
     }
 
-    public practice(String name, int age) {
+    public Student(String name, int age) {
         this.name = name;
         this.age = age;
     }
