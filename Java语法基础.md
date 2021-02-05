@@ -555,3 +555,180 @@ ArrayList对象不能存储基本类型，只能存储引用类型的数据。�
 |   char   | Character |
 | boolean  |  Boolean  |
 
+---
+
+### 4.4 String 类
+
++ 字符串的内容永不可改变，因此可以共享使用
+
+
++ **构造方法：**
+  + `public String()` ：初始化新创建的 String对象，以使其表示空字符序列
+  + `public String(char[] value)` ：通过当前参数中的字符数组来构造新的String
+  + `public String(byte[] bytes)` ：通过使用平台的默认字符集解码当前参数中的字节数组来构造新的String
+
+```java
+public class DemoString {
+    public static void main(String[] args) {
+        String str1 = new String();
+        System.out.println("第一种：" + str1);  //第一种：
+
+        char[] charArray = {'A', 'B' ,'C'};
+        String str2 = new String(charArray);
+        System.out.println("第二种：" + str2);  //第二种：ABC
+
+        byte[] byteArray = {97, 98, 99};
+        String str3 = new String(byteArray);
+        System.out.println("第三种：" + str3);  //第三种：abc
+
+        //直接创建
+        String str4 = "Hello!";
+        System.out.println("直接创建：" + str4);  //直接创建：Hello!
+    }
+}
+```
+
++ **常量池：**
+
+  对于基本类型来说，== 是进行数值的比较
+
+  对于引用类型来说，== 是进行**地址值**的比较
+
+```java
+public class DemoString {
+  public static void main(String[] args) {
+    String str1 = "abc";
+    String str2 = "abc";
+    
+    char[] charArray = {'a', 'b', 'c'};
+    String str3 = new String(charArray);
+    
+    System.out.println(str1 == str2);   //true
+    System.out.println(str1 == str3);   //false
+    System.out.println(str2 == str3);   //false
+  }
+}
+```
+
+双引号直接写的字符串在常量池中，new的不在池中
+
++ **判断功能的方法：**
+
+  + `public boolean equals (Object anObject)` ：将此字符串与指定对象进行比较
+
+  + `public boolean equalsIgnoreCase (String anotherString)` ：将此字符串与指定对象进行比较，忽略大小写
+
+​       如果比较一个常量和一个变量，推荐把常量字符串写在前面
+
+```java
+public class DemoString {
+	public static void main(String[] args) {
+		// 创建字符串对象
+		String s1 = "hello";
+		String s2 = "hello";
+		String s3 = "HELLO";
+    
+		// boolean equals(Object obj): 比较字符串的内容是否相同
+		System.out.println(s1.equals(s2));   // true
+		System.out.println(s1.equals(s3));   // false
+		System.out.println("‐‐‐‐‐‐‐‐‐‐‐");
+
+    //boolean equalsIgnoreCase(String str): 比较字符串的内容是否相同,忽略大小写
+		System.out.println(s1.equalsIgnoreCase(s2));   // true
+		System.out.println(s1.equalsIgnoreCase(s3));   // true
+		System.out.println("‐‐‐‐‐‐‐‐‐‐‐");
+	}
+}
+```
+
++ **获取功能的方法：**
+  + `public int length ()` ：返回此字符串的长度
+  + `public String concat (String str)` ：将当前的字符串连接到该字符串的末尾
+  + `public char charAt (int index)` ：返回指定索引处的 char值
+  + `public int indexOf (String str)` ：返回指定子字符串第一次出现在该字符串内的索引，没有返回-1
+  + `public String substring (int beginIndex)` ：返回一个子字符串，从beginIndex开始截取字符串到字符
+    串结尾
+  + `public String substring (int beginIndex, int endIndex)` ：返回一个子字符串，从`beginIndex`到`endIndex`截取字符串。含`beginIndex`，不含`endIndex`
+
+```java
+public class DemoString {
+	public static void main(String[] args) {
+		//创建字符串对象
+		String s = "helloworld";
+    
+		// int length():获取字符串的长度，其实也就是字符个数
+		System.out.println(s.length());  //10
+
+		// String concat (String str):将将指定的字符串连接到该字符串的末尾.
+		String s2 = s.concat("**hello itheima");
+		System.out.println(s2);  // helloworld**hello itheima
+    
+		// char charAt(int index):获取指定索引处的字符
+		System.out.println(s.charAt(0));  //h
+		System.out.println(s.charAt(1));  //e
+
+		// int indexOf(String str):获取str在字符串对象中第一次出现的索引,没有返回‐1
+		System.out.println(s.indexOf("l"));  //2
+
+		// String substring(int start):从start开始截取字符串到字符串结尾
+		System.out.println(s.substring(2));  /lloworld
+
+		// String substring(int start,int end):从start到end截取字符串。含start，不含end。
+		System.out.println(s.substring(0, s.length()));  //helloworld
+		System.out.println(s.substring(3,8));  //lowor
+	}
+}
+```
+
++ **转换功能的方法：**
+  + `public char[] toCharArray ()` ：将当前字符串拆分为字符数组作为返回值
+  + `public byte[] getBytes ()` ：使用平台的默认字符集将该 String编码转换为新的字节数组
+  + `public String replace (CharSequence target, CharSequence replacement)` ：将与`target`匹配的字符串使用`replacement`字符串替换（`CharSequence`：可以接受字符串类型）
+
+```java
+public class DemoString {
+	public static void main(String[] args) {
+		//创建字符串对象
+		String s = "abcde";
+		
+    // char[] toCharArray():把字符串转换为字符数组
+		char[] chs = s.toCharArray();
+		for(int i = 0; i < chs.length; i++) {
+			System.out.println(chs[i]);  //a b c d e
+		}
+		
+		// byte[] getBytes ():把字符串转换为字节数组
+		byte[] bytes = s.getBytes();
+		for(int i = 0; i < bytes.length; i++) {
+			System.out.println(bytes[i]);  //97 98 99 100 101
+		}
+
+		// 替换字母it为大写IT
+    String str = "itcast itheima";
+		String replace = str.replace("it", "IT");
+		System.out.println(replace);  // ITcast ITheima
+  }
+}
+```
+
++ **分割功能的方法：**
+  + `public String[] split(String regex)` ：将此字符串按照给定的`regex`（规则）拆分为字符串数组
+
+```java
+public class DemoString {
+	public static void main(String[] args) {
+		//创建字符串对象
+		String s = "aa|bb|cc";
+		String[] strArray = s.split("|");  // ["aa", "bb", "cc"]
+		for(int x = 0; x < strArray.length; x++) {
+			System.out.println(strArray[x]);  // aa bb cc
+		}
+	}
+}
+```
+不能用`.`分割，因为不是正则表达式，可以用 `\\.`
+
+---
+
+### 4.5 static 关键字
+
