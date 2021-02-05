@@ -309,7 +309,128 @@ public class ClassName{
 
 ----
 
-### 3.4 封装
+### 3.4 static 关键字
+
+关于 static 关键字的使用，它可以用来修饰的成员变量和成员方法，被修饰的成员是属于类的，而不是单单是属于某个对象的。也就是说，既然属于类，就可以不靠创建对象来调用了。
+
++ 类变量
+
+当 `static` 修饰成员变量时，该变量称为类变量。该类的每个对象都共享同一个类变量的值。任何对象都可以更改该类变量的值，但也可以在不创建该类的对象的情况下对类变量进行操作。
+
+```java
+//Student.java
+public class Student {
+    private String name;
+    private int age;
+
+    static String room;  //所在教室
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+//---------------------------------------------------------
+//Demojava.java
+public class DemoStatic {
+    public static void main(String[] args) {
+        Student s1 = new Student("帆仔", 20);
+        s1.room = "101教室";
+        Student s2 = new Student("呆呆", 18);
+
+        System.out.println(s1.getName() + " " + s1.getAge() + " " + s1.room);   // 帆仔 20 101教室
+        System.out.println(s2.getName() + " " + s2.getAge() + " " + s2.room);  // 呆呆 18 101教室
+      	System.out.println(s2.getName() + " " + s2.getAge() + " " + Student.room);  // 呆呆 18 101教室（建议：类名.类变量名；）
+    }
+}
+
+```
+
++ 静态方法
+
+当 `static` 修饰成员方法时，该方法称为**静态方法** ，属于类，而不是对象。静态方法在声明中有 `static` ，建议使用类名来调用，而不需要创建类的对象。调用方式非常简单。
+
+```java
+// 访问类变量
+类名.类变量名；
+
+// 调用静态方法(建议)
+类名.静态方法名(参数)；
+// 对于本类中的静态方法，可以省略类名称
+静态方法名(参数)； 
+```
+
+**注意：**静态不能访问非静态（在内存中先有静态内容，后有非静态内容--先人不知道后人，同时静态不能使用`this`指针）
+
+```java
+public class Static {
+    int num;
+    static int numStatic;
+    
+    public void method() {
+        System.out.println(num);  //正确
+        System.out.println(numStatic);  //正确
+    }
+    
+    public static void methodStatic(String[] args) {
+        System.out.println(num);  //错误--静态不能访问非静态
+        System.out.println(numStatic);  //正确
+    }
+}
+```
+
++ 静态代码块
+
+```java
+public class ClassName{
+	static {
+	// 执行语句
+	}
+}
+```
+
+​	作用：给类变量进行初始化赋值。用法演示，代码如下：
+
+```java
+public class Game {
+	public static int number;
+	public static ArrayList<String> list;
+  
+	static {
+		// 给类变量赋值
+		number = 2;
+		list = new ArrayList<String>();
+		// 添加元素到集合中
+		list.add("张三");
+		list.add("李四");
+		}
+}
+```
+>特点：当第一次用到本类时，静态代码块执行唯一一次。静态内容优先非静态，因此静态代码块比构造方法先执行（每次new都会执行构造，但静态代码块只运行一次）
+>
+>用途：用来一次性的对静态成员变量进行赋值
+---
+
+### 3.5 封装
 
 + **this使用：**区分重名`（通过谁调用的方法，谁就是this）`
 
@@ -436,6 +557,14 @@ public class DemoPerson {
 Process finished with exit code 0
 ```
 
+---
+
+### 3.6 继承
+
+
+
+
+
 ## 4 常用类
 
 ------
@@ -492,10 +621,10 @@ public class DemoRandom {
 
 ArrayList 是大小可变的数组的实现（数组必须定义大小，一旦定义不可变化）
 
-+ `public boolean add(E e)` ：将指定的元素添加到此集合的尾部。
-+ `public E remove(int index)` ：移除此集合中指定位置上的元素，返回被删除的元素。
-+ `public E get(int index)` ：返回此集合中指定位置上的元素，返回获取的元素。
-+ `public int size()` ：返回此集合中的元素数。遍历集合时，可以控制索引范围，防止越界。
+> `public boolean add(E e)` ：将指定的元素添加到此集合的尾部。
+> `public E remove(int index)` ：移除此集合中指定位置上的元素，返回被删除的元素。
+> `public E get(int index)` ：返回此集合中指定位置上的元素，返回获取的元素。
+> `public int size()` ：返回此集合中的元素数。遍历集合时，可以控制索引范围，防止越界。
 
 ```java
 import java.util.ArrayList;
@@ -563,9 +692,9 @@ ArrayList对象不能存储基本类型，只能存储引用类型的数据。�
 
 
 + **构造方法：**
-  + `public String()` ：初始化新创建的 String对象，以使其表示空字符序列
-  + `public String(char[] value)` ：通过当前参数中的字符数组来构造新的String
-  + `public String(byte[] bytes)` ：通过使用平台的默认字符集解码当前参数中的字节数组来构造新的String
+> `public String()` ：初始化新创建的 String对象，以使其表示空字符序列
+> `public String(char[] value)` ：通过当前参数中的字符数组来构造新的String
+> `public String(byte[] bytes)` ：通过使用平台的默认字符集解码当前参数中的字节数组来构造新的String
 
 ```java
 public class DemoString {
@@ -614,9 +743,8 @@ public class DemoString {
 
 + **判断功能的方法：**
 
-  + `public boolean equals (Object anObject)` ：将此字符串与指定对象进行比较
-
-  + `public boolean equalsIgnoreCase (String anotherString)` ：将此字符串与指定对象进行比较，忽略大小写
+> `public boolean equals (Object anObject)` ：将此字符串与指定对象进行比较
+> `public boolean equalsIgnoreCase (String anotherString)` ：将此字符串与指定对象进行比较，忽略大小写
 
 ​       如果比较一个常量和一个变量，推荐把常量字符串写在前面
 
@@ -642,13 +770,13 @@ public class DemoString {
 ```
 
 + **获取功能的方法：**
-  + `public int length ()` ：返回此字符串的长度
-  + `public String concat (String str)` ：将当前的字符串连接到该字符串的末尾
-  + `public char charAt (int index)` ：返回指定索引处的 char值
-  + `public int indexOf (String str)` ：返回指定子字符串第一次出现在该字符串内的索引，没有返回-1
-  + `public String substring (int beginIndex)` ：返回一个子字符串，从beginIndex开始截取字符串到字符
+> `public int length ()` ：返回此字符串的长度
+> `public String concat (String str)` ：将当前的字符串连接到该字符串的末尾
+> `public char charAt (int index)` ：返回指定索引处的 char值
+> `public int indexOf (String str)` ：返回指定子字符串第一次出现在该字符串内的索引，没有返回-1
+> `public String substring (int beginIndex)` ：返回一个子字符串，从beginIndex开始截取字符串到字符
     串结尾
-  + `public String substring (int beginIndex, int endIndex)` ：返回一个子字符串，从`beginIndex`到`endIndex`截取字符串。含`beginIndex`，不含`endIndex`
+> `public String substring (int beginIndex, int endIndex)` ：返回一个子字符串，从`beginIndex`到`endIndex`截取字符串。含`beginIndex`，不含`endIndex`
 
 ```java
 public class DemoString {
@@ -681,9 +809,9 @@ public class DemoString {
 ```
 
 + **转换功能的方法：**
-  + `public char[] toCharArray ()` ：将当前字符串拆分为字符数组作为返回值
-  + `public byte[] getBytes ()` ：使用平台的默认字符集将该 String编码转换为新的字节数组
-  + `public String replace (CharSequence target, CharSequence replacement)` ：将与`target`匹配的字符串使用`replacement`字符串替换（`CharSequence`：可以接受字符串类型）
+> `public char[] toCharArray ()` ：将当前字符串拆分为字符数组作为返回值
+> `public byte[] getBytes ()` ：使用平台的默认字符集将该 String编码转换为新的字节数组
+> `public String replace (CharSequence target, CharSequence replacement)` ：将与`target`匹配的字符串使用`replacement`字符串替换（`CharSequence`：可以接受字符串类型）
 
 ```java
 public class DemoString {
@@ -712,7 +840,7 @@ public class DemoString {
 ```
 
 + **分割功能的方法：**
-  + `public String[] split(String regex)` ：将此字符串按照给定的`regex`（规则）拆分为字符串数组
+> `public String[] split(String regex)` ：将此字符串按照给定的`regex`（规则）拆分为字符串数组
 
 ```java
 public class DemoString {
@@ -730,5 +858,69 @@ public class DemoString {
 
 ---
 
-### 4.5 static 关键字
+### 4.5 Arrays 类
+
+`java.util.Arrays` 此类包含用来操作数组的各种方法，比如排序和搜索等。其所有方法均为静态方法，调用起来非常简单。
+
+> `public static String toString(int[] a)` ：返回指定数组内容的字符串表示形式（按照默认格式：[][][元素1，元素2...] )
+
+```java
+import java.util.Arrays;
+public static void main(String[] args) {
+	// 定义int 数组
+	int[] arr = {2,34,35,4,657,8,69,9};
+  
+	// 打印数组,输出地址值
+	System.out.println(arr); // [I@2ac1fdc4
+  
+	// 数组内容转为字符串
+		String s = Arrays.toString(arr);
+  
+	// 打印字符串,输出内容
+	System.out.println(s); // [2, 34, 35, 4, 657, 8, 69, 9]
+}
+```
+
+> `public static void sort(int[] a)` ：对指定的 int 型数组按数字升序进行排序
+
+```java
+public static void main(String[] args) {
+	// 定义int 数组
+	int[] arr = {24, 7, 5, 48, 4, 46, 35, 11, 6, 2};
+	System.out.println("排序前:"+ Arrays.toString(arr)); 
+  // 排序前:[24, 7, 5, 48, 4, 46, 35, 11, 6, 2]
+  
+	// 升序排序
+	Arrays.sort(arr);
+	System.out.println("排序后:"+ Arrays.toString(arr));
+  // 排序后:[2, 4, 5, 6, 7, 11, 24, 35, 46, 48]
+}
+```
+
+---
+
+### 4.6 Math 类
+
+`java.lang.Math` 类包含用于执行基本数学运算的方法，如初等指数、对数、平方根和三角函数。类似这样的工具类，其所有方法均为静态方法，并且不会创建对象，调用起来非常简单
+
+> `public static double abs(double a)` ：返回 double 值的绝对值
+>  `public static double ceil(double a)` ：返回大于等于参数的最小的整数
+> `public static double floor(double a)` ：返回小于等于参数最大的整数
+> `public static long round(double a)` ：返回最接近参数的 long (相当于四舍五入方法)
+
+```java
+double d1 = Math.abs(‐5);  //d1的值为5
+double d2 = Math.abs(5);  //d2的值为5
+
+double d1 = Math.ceil(3.3);  //d1的值为 4.0
+double d2 = Math.ceil(‐3.3);  //d2的值为 ‐3.0
+double d3 = Math.ceil(5.1);  //d3的值为 6.0
+
+double d1 = Math.floor(3.3);  //d1的值为3.0
+double d2 = Math.floor(‐3.3);  //d2的值为‐4.0
+double d3 = Math.floor(5.1);  //d3的值为 5.0
+
+long d1 = Math.round(5.5);  //d1的值为6.0
+long d2 = Math.round(5.4);  //d2的值为5.0
+```
 
