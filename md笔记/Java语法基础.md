@@ -561,9 +561,116 @@ Process finished with exit code 0
 
 ### 3.6 继承
 
++ 通过 `extends` 关键字，可以声明一个子类继承另外一个父类
 
+```java
+class 父类 {
+	...
+}
+class 子类 extends 父类 {
+	...
+}
+```
 
+>**重名问题：**
+>
+>子父类中出现了同名的成员变量时，在子类中需要访问父类中非私有成员变量时，需要使用 `super` 关键字，修饰父类成员变量，类似于之前学过的 `this`
 
++ 通过`@Override`可以检测是否是重写
+
+```java
+public class Employee {
+    public void method() {
+        System.out.println("父类方法执行！");
+    }
+}
+//----------------------------------------------
+public class Teacher extends Employee {
+    @Override   //建议写上，防止出错
+    public void method() {
+        System.out.println("子类方法执行");
+    }
+}
+```
+
+>**方法重写问题：**
+>
+>子类方法的返回值必须**小于等于**父类方法的返回值范围
+>
+>子类方法的权限必须**大于等于**父类方法的权限修饰符（
+>
+>父：private 子：public   正确
+>
+>父：public  子：private  错误
+
++ 构造方法
+
+  + 构造方法的名字是与类名一致的，所以子类是无法继承父类构造方法的
+  + 构造方法的作用是初始化成员变量的。所以子类的初始化过程中，必须先执行父类的初始化动作。子类的构造方法中默认有一个 `super()` ，表示调用父类的构造方法，父类成员变量初始化后，才可以给子类使用
+
+```java
+class Fu {
+	private int n;
+	public Fu(){
+		System.out.println("Fu()");
+	}
+}
+
+class Zi extends Fu {
+	public Zi(){
+		//super();   默认调用父类构造
+    //super（20）  子类可以通过super调用父类重载构造
+		System.out.println("Zi()");
+	}
+}
+
+public class DemoExtends{
+	public static void main (String args[]){
+	Zi zi = new Zi();
+	}
+}
+
+输出结果：
+Fu（）
+Zi（）
+```
+
+>**super 关键字用法：**
+>
+>1. 在子类的成员方法中，访问父类的成员变量
+>2. 在子类的成员方法中，访问父类的成员方法
+>3. 在子类的构造方法中，访问父类的构造方法
+
+> `this`: 代表当前对象的引用，访问本类的内容（谁调用代表谁）
+> `super`: 代表父类的存储空间标识，访问父类的内容（父亲的引用）
+>
+> ```java
+> this.成员变量   // 本类的
+> super.成员变量   // 父类的
+>   
+> this.成员方法名()  // 本类的
+> super.成员方法名()  // 父类的
+> ```
+
++ **抽象类**
+
+使用 `abstract` 关键字修饰方法，该方法就成了抽象方法，抽象方法只包含一个方法名，而没有方法体，如果一个类包含抽象方法，那么该类必须是抽象类
+
+```java
+修饰符 abstract class 类名字 {
+  修饰符 abstract 返回值类型 方法名 (参数列表)；
+}
+  
+public abstract class 类名字 {
+  public abstract void run()；
+}
+```
+
+> 不能直接new抽象类对象
+>
+> > 理解：假设创建了抽象类的对象，调用抽象的方法，而抽象方法没有具体的方法体，没有意义
+
+> 抽象类的子类，必须重写抽象父类中所有的抽象方法，否则，编译无法通过而报错。除非该子类也是抽象类
 
 ## 4 常用类
 
