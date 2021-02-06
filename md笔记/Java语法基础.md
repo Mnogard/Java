@@ -288,6 +288,12 @@ public class DemoStudent {
 | 成员变量 | 有默认值 |  堆内存  |   随着对象的创建而存在，消失而消失   |
 | 局部变量 | 无默认值 |  栈内存  | 随着方法的调用而存在，方法调用完消失 |
 
++ 访问成员变量的两种方式
+  + 直接通过对象名称访问成员变量：看等号左边是谁，优先用谁，没有则向上找
+  + 间接通过成员方法访问成员变量：看该方法属于谁，优先用谁，没有则向上找
++ 访问成员方法
+  + new的是谁，就优先用谁，没有则向上找
+
 ------
 
 ### 3.3 标准代码 -- Java Bean
@@ -654,6 +660,8 @@ Zi（）
 
 + **抽象类**
 
+父类中的方法，被它的子类们重写，子类各自的实现都不尽相同。那么父类的方法声明和方法主体，只有声明还有意义，而方法主体则没有存在的意义了。我们把没有方法主体的方法称为抽象方法。Java语法规定，包含抽象方法的类就是抽象类。
+
 使用 `abstract` 关键字修饰方法，该方法就成了抽象方法，抽象方法只包含一个方法名，而没有方法体，如果一个类包含抽象方法，那么该类必须是抽象类
 
 ```java
@@ -671,6 +679,221 @@ public abstract class 类名字 {
 > > 理解：假设创建了抽象类的对象，调用抽象的方法，而抽象方法没有具体的方法体，没有意义
 
 > 抽象类的子类，必须重写抽象父类中所有的抽象方法，否则，编译无法通过而报错。除非该子类也是抽象类
+
+---
+
+### 3.7 接口
+
+接口的定义，它与定义类方式相似，但是使用 `interface` 关键字。它也会被编译成`.class`文件，但一定要明确它并不是类，而是另外一种引用数据类型。
+
+接口的使用，它不能创建对象，但是可以被实现（ `implements` ，类似于被继承）。一个实现接口的类（可以看做是接口的子类），需要实现接口中所有的抽象方法，创建该类对象，就可以调用方法了，否则它必须是一个抽象类。
+
+> Java 7
+> 1. 常量
+> 2. 抽象方法
+>
+> Java 8
+> 3. 默认方法
+> 4. 静态方法
+>
+> Java 9 
+>
+> 5. 私有方法
+
+```java
+public interface 接口名称 {
+// 抽象方法
+// 默认方法
+// 静态方法
+// 私有方法
+}
+//--------------------------------------------------------------------------
+//接口当中的抽象方法，修饰符必须是固定的关键字：public abstract （可选择性省略）
+public interface MyInterfaceAbstract {
+
+    //抽象方法
+		//[public] [abstract] 返回值类型 方法名称（参数列表); 
+    public abstract void methods1();
+    abstract void methods2();
+    public void methods3();
+    void methods4();
+  
+  	//默认方法
+		//[public] [default] 返回值类型 方法名称（参数列表）{方法体}
+  	public default void fly(){
+			System.out.println("天上飞");
+      
+    //静态方法
+		//[public] static 返回值类型 方法名称（参数列表）{方法体}
+		}
+}
+```
+
+> 默认方法：接口类中增加默认方法（接口升级），实现类中无需重写便可调用（抽象方法需重写），也可以重写覆盖
+>
+> **注意：**不能通过接口实现类的对象来调用接口当中的**静态方法**
+>
+> ```java
+> 正确用法：通过接口名称直接调用静态方法
+> 接口名称.静态方法名(参数);
+> ```
+
++ 私有方法
+
+如果一个接口中有多个默认方法，并且方法中有重复的内容，那么可以抽取出来，封装到私有方法中，供默认方法
+去调用
+
+**私有方法：**解决多个默认方法之间重复代码问题（只有默认方法可以调用）
+**私有静态方法：**解决多个静态方法之间重复代码问题（默认方法和静态方法可以调用）
+
+```java
+//私有方法：
+//private 返回值类型 方法名（参数列表）{方法体}
+
+//静态私有方法：
+//private static 返回值类型 方法名（参数列表）{方法体}
+
+public interface MyInterfacePrivate {
+  public default void mdthodDefault1() {
+    System.out.println("默认方法1");
+    methodCommon();
+  }
+  
+  public default void mdthodDefault2() {
+    System.out.println("默认方法2");
+    methodCommon();
+  }
+  
+  private void mdthodDefault1() {
+    System.out.println("AAA");
+    System.out.println("BBB");
+    System.out.println("CCC");
+  }
+}
+```
+
++ 接口使用：
+
+```java
+public class 实现类名 implements 接口名 {
+	// 重写接口中抽象方法【必须】
+	// 重写接口中默认方法【可选】
+}
+
+//------------------------------------------------------------------
+public class DemoInterface {
+    public static void main(String[] args) {
+        //MyInterfaceAbstract inter = new MyInterfaceAbstract();  错误，不能直接new接口
+        //创建实现类
+        MyInterfaceAbstractImpl inter = new MyInterfaceAbstractImpl();
+        inter.methods();
+    }
+}
+//------------------------------------------------------------------
+public interface MyInterfaceAbstract {
+    //抽象方法
+    public abstract void methods();
+}
+//------------------------------------------------------------------
+public class MyInterfaceAbstractImpl implements MyInterfaceAbstract {
+    @Override
+    public void methods() {
+        System.out.println("方法");
+    }
+}
+
+```
+
++ 接口的常量
+
+接口中可以定义“成员变量”，但必须使用public static final关键字进行修饰（可以省略关键字）
+
+```java
+//格式：[public] [static] [final] 数据类型 常量名 = 数据值;
+
+public interface MyInterfaceConst {
+    //这其实就是一个常量，一旦赋值，不可修改
+    public static final int NUM = 10;  //final不可变
+    //可以省略关键字
+}
+```
+
+> 接口中的常量必须进行赋值（要是默认值设置，不能修改，那毫无意义）
+>
+> 接口中的常量需要大写，用下划线分隔
+
+> **接口备注：**
+>
+> 接口没有静态代码块和构造方法
+
++ 接口的多实现
+
+一个类的直接父类是唯一的，但是一个类可以同时实现多个接口
+
+```java
+public class 类名 [extends 父类名] implements 接口名1,接口名2,接口名3... {
+// 重写接口中抽象方法【必须】
+// 重写接口中默认方法【不重名时可选】
+}
+```
+
+> 抽象方法：
+>
+> > 接口中，有多个抽象方法时，实现类必须重写所有抽象方法（如果抽象方法有重名的，只需要重写一次）
+> >
+> > 如果实现类没有覆盖重写所有接口当中的抽象方法，那么实现类必须写成抽象类`public abstract` class`
+
+> 默认方法：
+>
+> > 接口中，有多个默认方法时，实现类都可继承使用（如果默认方法有重名的，必须重写一次）
+> >
+> > 如果父类中的方法和接口中的默认方法产生了冲突，优先使用父类中的方法
+
+> 静态方法：
+>
+> > 接口中，存在同名的静态方法并不会冲突，原因是只能通过各自接口名访问静态方法
+
++ 接口的多继承
+
+一个接口能继承另一个或者多个接口，这和类之间的继承比较相似。接口的继承使用 `extends` 关键字，子接口继承父接口的方法。如果父接口中的默认方法有重名的，那么子接口需要重写一次（抽象方法重复，没关系，因为没有方法体，没有具体的实现）
+
+```java
+//定义父类接口
+public interface A {
+	public default void method(){
+	System.out.println("AAAAAAAAAAAAAAAAAAA");
+	}
+}
+
+public interface B {
+	public default void method(){
+	System.out.println("BBBBBBBBBBBBBBBBBBB");
+	}
+}
+
+//定义子类接口
+public interface D extends A,B{
+	@Override
+	public default void method() {
+	System.out.println("DDDDDDDDDDDDDD");
+	}
+}
+```
+
+>⚠️
+> **子接口**重写默认方法时，default关键字需要保留。
+> **子类**重写默认方法时，default关键字不可以保留。
+
+### 3.8 多态
+
+多态： 是指同一行为，具有多个不同表现形式。
+
+```java
+父类类型 变量名 = new 子类对象；
+变量名.方法名();
+```
+
+> 当使用多态方式调用方法时，首先检查父类中是否有该方法，如果没有，则编译错误；如果有，执行的是子类重写后方法
 
 ## 4 常用类
 
