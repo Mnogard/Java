@@ -1620,6 +1620,1517 @@ long d1 = Math.round(5.5);  //d1的值为6.0
 long d2 = Math.round(5.4);  //d2的值为5.0
 ```
 
+---
+
+### 5.7 Object 类
+
+`java.lang.Object` 类是Java语言中的根类，即所有类的父类。它中描述的所有方法子类都可以使用。在对象实例化的时候，最终找的父类就是`Object`。
+
+如果一个类没有特别指定父类， 那么默认则继承自`Object`类。
+
+```java
+public class MyClass /*extends Object*/ {
+		// ...
+}
+```
+
+> `public String toString()` ：返回该对象的字符串表示。
+> `public boolean equals(Object obj)` ：指示其他某个对象是否与此对象“相等”
+
++ **toString 方法**
+
+> `public String toString()` ：返回该对象的字符串表示。
+
+`toString`方法返回该对象的字符串表示，其实该字符串内容就是`对象的类型+@+内存地址值`。
+由于`toString`方法返回的结果是内存地址，而在开发中，经常需要按照对象的属性得到相应的字符串表现形式，因此也需要重写它。
+
+**覆盖重写**
+
+```java
+public class Person {
+		private String name;
+		private int age;
+  
+		@Override
+		public String toString() {
+				return "Person{" + "name='" + name + '\'' + ", age=" + age +'}';
+		}
+		// 省略构造器与Getter Setter
+}
+```
+
+> 如果重写，`println`输出的对象将不是地址值，而是内容
+
++ **equals 方法**
+
+> `public boolean equals(Object obj)` ：指示其他某个对象是否与此对象“相等”
+
+**默认地址比较**
+
+如果没有覆盖重写`equals`方法，那么`Object`类中默认进行 `==` 运算符的对象地址比较，只要不是同一个对象，结果必然为`false`。
+
+**对象内容比较**
+
+如果希望进行对象的内容比较，即所有或指定的部分成员变量相同就判定两个对象相同，则可以覆盖重写`equals`方法。
+
+```java
+import java.util.Objects;
+
+public class Person {
+		private String name;
+		private int age;
+  
+		@Override
+		public boolean equals(Object o) {
+				// 如果对象地址一样，则认为相同
+				if (this == o)
+						return true;
+				// 如果参数为空，或者类型信息不一样，则认为不同
+      	//getClass() 使用反射技术，判断是否Person类，等效于o instance of Person
+				if (o == null || getClass() != o.getClass())
+						return false;
+				// 转换为当前类型（否则父类无法访问子类特有的内容）
+				Person person = (Person) o;
+				// 要求基本类型相等，并且将引用类型交给java.util.Objects类的equals静态方法取用结果
+				return age == person.age && Objects.equals(name,person.name);
+		}
+}
+```
+
+在比较两个对象的时候，`Object`的`equals`方法容易抛出**空指针异常**，而`Objects`类中的`equals`方法就优化了这个问题。
+
+> `public static boolean equals(Object a, Object b)` : 判断两个对象是否相等
+
+```java
+public static boolean equals(Object a, Object b) {
+		return (a == b) || (a != null && a.equals(b));
+}
+```
+
+---
+
+### 5.8 日期时间类
+
+#### Date 类
+
+> `public Date()` ：分配`Date`对象并初始化此对象，以表示分配它的时间（精确到毫秒）
+>
+> `public Date(long date)` ：分配Date对象并初始化此对象，以表示自从标准基准时间（称为“历元（epoch）”，即1970年1月1日00:00:00 GMT）以来的指定毫秒数
+>
+> `public long getTime()`:   把日期对象转换成对应的时间毫秒值
+
+简单来说：使用无参构造，可以自动设置当前系统时间的毫秒时刻；指定long类型的构造参数，可以自定义毫秒时刻。例如：
+
+```java
+import java.util.Date;
+
+public class Demo01Date {
+		public static void main(String[] args) {
+				// 创建日期对象，把当前的时间
+				System.out.println(new Date()); 
+				// 创建日期对象，把当前的毫秒值转成日期对象
+				System.out.println(new Date(0L)); 
+     	  //把日期对象转换成对应的时间毫秒值
+      	System.out.println(new Date().getTime());
+		}
+}
+
+运行结果：
+Tue Feb 09 10:51:17 CST 2021
+Thu Jan 01 08:00:00 CST 1970
+1612839838125
+```
+
+> tips:在使用println方法时，会自动调用Date类中的toString方法。Date类对Object类中的toString方法进行了覆盖重写，所以结果为指定格式的字符串。
+>
+> 时间原点：Thu Jan 01 08:00:00 CST 1970
+
+---
+
+#### DateFormat 类
+
+`java.text.DateFormat` 是日期/时间格式化子类的抽象类，我们通过这个类可以帮我们完成日期和文本之间的转换,也就是可以在`Date`对象与`String`对象之间进行来回转换。
+
++ 格式化：按照指定的格式，从`Date`日期转换为`String`字符串。
++ 解析：按照指定的格式，从`String`字符串转换为`Date`日期。
+
+**构造方法**
+
+由于`DateFormat`为抽象类，不能直接使用，所以需要常用的子类`java.text.SimpleDateFormat` 。这个类需要一个模式（格式）来指定格式化或解析的标准。构造方法为：
+
+> `public SimpleDateFormat(String pattern)` ：用给定的模式和默认语言环境的日期格式符号构造`SimpleDateFormat`
+
+```java
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+public class Demo02SimpleDateFormat {
+		public static void main(String[] args) {
+				// 对应的日期格式如：2018‐01‐16 15:06:38
+				DateFormat format = new SimpleDateFormat("yyyy‐MM‐dd HH:mm:ss");
+		}
+}
+```
+
+> `public String format(Date date)` ：将Date对象格式化为字符串
+>
+> `public Date parse(String source)` ：将字符串解析为Date对象
+
+**format 方法**
+
+```java
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+/*
+把Date对象转换成String
+*/
+public class Demo03DateFormatMethod {
+		public static void main(String[] args) {
+				Date date = new Date();
+				// 创建日期格式化对象,在获取格式化对象时可以指定风格
+				DateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+				String str = df.format(date);
+				System.out.println(str); 
+		}
+}
+
+运行结果：
+2021年02月09日
+```
+
+**parse 方法**
+
+```java
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+/*
+把String转换成Date对象
+*/
+public class Demo04DateFormatMethod {
+		public static void main(String[] args) throws ParseException {
+				DateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+				String str = "2018年12月11日";
+				Date date = df.parse(str);
+				System.out.println(date); 
+		}
+}
+
+运行结果：
+Tue Dec 11 00:00:00 CST 2018
+```
+
+---
+
+#### Calendar 类
+
+`java.util.Calendar` 是日历类，在`Date`后出现，替换掉了许多`Date`的方法。该类将所有可能用到的时间信息封装为静态成员变量，方便获取。日历类就是方便获取各个时间属性的
+
+**获取方式**
+
+Calendar为抽象类，由于语言敏感性，Calendar类在创建对象时并非直接创建，而是通过静态方法创建，返回子类对象，如下：
+
+> `public static Calendar getInstance()` ：使用默认时区和语言环境获得一个日历
+
+```java
+import java.util.Calendar;
+public class Demo06CalendarInit {
+		public static void main(String[] args) {
+				Calendar cal = Calendar.getInstance();
+		}
+}
+```
+
+**常用方法**
+
+> `public int get(int field)` ：返回给定日历字段的值。
+> `public void set(int field, int value)` ：将给定的日历字段设置为给定值。
+> `public abstract void add(int field, int amount)` ：根据日历的规则，为给定的日历字段添加或减去指定的时间量。
+> `public Date getTime()` ：返回一个表示此`Calendar`时间值（从历元到现在的毫秒偏移量）的`Date`对象。
+
+| 字段值       | 含义                                  |
+| ------------ | ------------------------------------- |
+| YEAR         | 年                                    |
+| MONTH        | 月（从0开始，可以+1使用）             |
+| DAY_OF_MONTH | 月中的天（几号）                      |
+| HOUR         | 时（12小时制）                        |
+| HOUR_OF_DAY  | 时（24小时制）                        |
+| MINUTE       | 分                                    |
+| SECOND       | 秒                                    |
+| DAY_OF_WEEK  | 周中的天（周几，周日为1，可以-1使用） |
+
+**get  /set 方法**
+
+get方法用来获取指定字段的值，set方法用来设置指定字段的值，代码使用演示：
+
+```java
+import java.util.Calendar;
+
+public class CalendarUtil {
+    public static void main(String[] args) {
+        // 创建Calendar对象
+        Calendar cal = Calendar.getInstance();
+        // 设置年 
+        int year = cal.get(Calendar.YEAR);
+        // 设置月
+        int month = cal.get(Calendar.MONTH) + 1;
+        // 设置日
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        System.out.print(year + "年" + month + "月" + dayOfMonth + "日");
+    }    
+}
+
+运行结果：
+2021年2月9日
+```
+
+```java
+import java.util.Calendar;
+
+public class Demo07CalendarMethod {
+    public static void main(String[] args) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, 2020);      
+     		// 设置年 
+        int year = cal.get(Calendar.YEAR);
+        // 设置月
+        int month = cal.get(Calendar.MONTH) + 1;
+        // 设置日
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        System.out.print(year + "年" + month + "月" + dayOfMonth + "日"); // 2020年1月17日
+    }
+}
+
+运行结果：
+2020年2月9日
+```
+
+**add 方法**
+
+add方法可以对指定日历字段的值进行加减操作，如果第二个参数为正数则加上偏移量，如果为负数则减去偏移量。代码如：
+
+```java
+import java.util.Calendar;
+
+public class Demo08CalendarMethod {
+    public static void main(String[] args) {
+        Calendar cal = Calendar.getInstance();
+        System.out.print(year + "年" + month + "月" + dayOfMonth + "日"); // 2018年1月17日
+        // 使用add方法
+        cal.add(Calendar.DAY_OF_MONTH, 2); // 加2天
+        cal.add(Calendar.YEAR, -3); // 减3年
+        System.out.print(year + "年" + month + "月" + dayOfMonth + "日"); // 2015年1月18日; 
+    }
+}
+```
+
+**getTime 方法**
+
+Calendar中的getTime方法并不是获取毫秒时刻，而是拿到对应的Date对象。
+
+```java
+import java.util.Calendar;
+import java.util.Date;
+
+public class Demo09CalendarMethod {
+    public static void main(String[] args) {
+        Calendar cal = Calendar.getInstance();
+        Date date = cal.getTime();
+        System.out.println(date); // Tue Jan 16 16:03:09 CST 2018
+    }
+}
+```
+
+> 小贴士：
+>
+>   西方星期的开始为周日，中国为周一。
+>
+>   在Calendar类中，月份的表示是以0-11代表1-12月。
+>
+>   日期是有大小关系的，时间靠后，时间越大。
+>
+
+---
+
+### 5.9 System 类
+
+`java.lang.System`类中提供了大量的静态方法，可以获取与系统相关的信息或系统级操作，在System类的API文档中，常用的方法有：
+
+> `public static long currentTimeMillis()`：返回以毫秒为单位的当前时间。
+> `public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length)`：将数组中指定的数据拷贝到另一个数组中。
+
+**currentTimeMillis 方法**
+
+实际上，currentTimeMillis方法就是 获取当前系统时间与1970年01月01日00:00点之间的毫秒差值
+
+```java
+import java.util.Date;
+
+public class SystemDemo {
+    public static void main(String[] args) {
+       	//获取当前时间毫秒值
+        System.out.println(System.currentTimeMillis()); // 1516090531144
+    }
+}
+```
+
+验证for循环打印数字1-9999所需要使用的时间（毫秒）
+
+~~~java
+public class SystemTest1 {
+    public static void main(String[] args) {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+            System.out.println(i);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("共耗时毫秒：" + (end - start));
+    }
+}
+~~~
+
+**arraycopy 方法**
+
+> `public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length)`：将数组中指定的数据拷贝到另一个数组中。
+
+数组的拷贝动作是系统级的，性能很高。System.arraycopy方法具有5个参数，含义分别为：
+
+| 参数序号 | 参数名称 | 参数类型 | 参数含义             |
+| -------- | -------- | -------- | -------------------- |
+| 1        | src      | Object   | 源数组               |
+| 2        | srcPos   | int      | 源数组索引起始位置   |
+| 3        | dest     | Object   | 目标数组             |
+| 4        | destPos  | int      | 目标数组索引起始位置 |
+| 5        | length   | int      | 复制元素个数         |
+
+```java
+import java.util.Arrays;
+
+public class Demo11SystemArrayCopy {
+    public static void main(String[] args) {
+        int[] src = new int[]{1,2,3,4,5};
+        int[] dest = new int[]{6,7,8,9,10};
+        System.arraycopy( src, 0, dest, 0, 3);
+        /*代码运行后：两个数组中的元素发生了变化
+         src数组元素[1,2,3,4,5]
+         dest数组元素[1,2,3,9,10]
+        */
+    }
+}
+```
+
+### 5.10 StringBuilder 类
+
+由于String类的对象内容不可改变，所以每当进行字符串拼接时，总是会在内存中创建一个新的对象。例如：
+
+~~~java
+public class StringDemo {
+    public static void main(String[] args) {
+        String s = "Hello";
+        s += "World";
+        System.out.println(s);
+    }
+}
+~~~
+
+在API中对String类有这样的描述：字符串是常量，它们的值在创建后不能被更改。
+
+根据这句话分析我们的代码，其实总共产生了三个字符串，即`"Hello"`、`"World"`和`"HelloWorld"`。引用变量s首先指向`Hello`对象，最终指向拼接出来的新字符串对象，即`HelloWord` 。
+
+由此可知，如果对字符串进行拼接操作，每次拼接，都会构建一个新的String对象，既耗时，又浪费空间。为了解决这一问题，可以使用`java.lang.StringBuilder`类。
+
+**概述**
+
+查阅`java.lang.StringBuilder`的API，StringBuilder又称为可变字符序列，它是一个类似于 String 的字符串缓冲区，通过某些方法调用可以改变该序列的长度和内容。
+
+原来StringBuilder是个字符串的缓冲区，即它是一个容器，容器中可以装很多字符串。并且能够对其中的字符串进行各种操作。
+
+它的内部拥有一个数组用来存放字符串内容，进行字符串拼接时，直接在数组中加入新内容。StringBuilder会自动维护数组的扩容。
+
+**构造方法**
+
+> `public StringBuilder()`：构造一个空的StringBuilder容器。
+> `public StringBuilder(String str)`：构造一个StringBuilder容器，并将字符串添加进去。
+
+```java
+public class StringBuilderDemo {
+    public static void main(String[] args) {
+        StringBuilder sb1 = new StringBuilder();
+        System.out.println(sb1); // (空白)
+        // 使用带参构造
+        StringBuilder sb2 = new StringBuilder("itcast");
+        System.out.println(sb2); // itcast
+    }
+}
+```
+
+**append 方法**
+
+> `public StringBuilder append(...)`：添加任意类型数据的字符串形式，并返回当前对象自身。
+
+append方法具有多种重载形式，可以接收任意类型的参数。任何数据作为参数都会将对应的字符串内容添加到StringBuilder中。例如：
+
+```java
+public class Demo02StringBuilder {
+	public static void main(String[] args) {
+		//创建对象
+		StringBuilder builder = new StringBuilder();
+		//public StringBuilder append(任意类型)
+    //这里并没有new新对象，因此地址一样
+		StringBuilder builder2 = builder.append("hello");
+		//对比一下
+		System.out.println("builder:"+builder);
+		System.out.println("builder2:"+builder2);
+		System.out.println(builder == builder2); //true
+	    // 可以添加 任何类型
+		builder.append("hello");
+		builder.append("world");
+		builder.append(true);
+		builder.append(100);
+		// 在我们开发中，会遇到调用一个方法后，返回一个对象的情况。然后使用返回的对象继续调用方法。
+        // 这种时候，我们就可以把代码现在一起，如append方法一样，代码如下
+		//链式编程
+		builder.append("hello").append("world").append(true).append(100);
+		System.out.println("builder:"+builder);
+	}
+}
+```
+
+> 备注：StringBuilder已经覆盖重写了Object当中的toString方法。
+
+**toString 方法**
+
+> `public String toString()`：将当前StringBuilder对象转换为String对象。
+
+通过toString方法，StringBuilder对象将会转换为不可变的String对象。如：
+
+```java
+public class Demo16StringBuilder {
+    public static void main(String[] args) {
+        // 链式创建
+        StringBuilder sb = new StringBuilder("Hello").append("World").append("Java");
+        // 调用方法
+        String str = sb.toString();
+        System.out.println(str); // HelloWorldJava
+    }
+}
+```
+
+---
+
+### 5.11 包装类
+
+Java提供了两个类型系统，基本类型与引用类型，使用基本类型在于效率，然而很多情况，会创建对象使用，因为对象可以做更多的功能，如果想要我们的基本类型像对象一样操作，就可以使用基本类型对应的包装类，如下：
+
+| 基本类型 | 对应的包装类（位于java.lang包中） |
+| :------: | :-------------------------------: |
+|   byte   |               Byte                |
+|  short   |               Short               |
+|   int    |            **Integer**            |
+|   long   |               Long                |
+|  float   |               Float               |
+|  double  |              Double               |
+|   char   |           **Character**           |
+| boolean  |              Boolean              |
+
+**装箱与拆箱**
+
+基本类型与对应的包装类对象之间，来回转换的过程称为”装箱“与”拆箱“：
+
+* **装箱**：从基本类型转换为对应的包装类对象。
+
+* **拆箱**：从包装类对象转换为对应的基本类型。
+
+用Integer与 int为例：（看懂代码即可）
+
+基本数值---->包装对象
+
+~~~java
+Integer i = new Integer(4);//使用构造函数函数
+Integer iii = Integer.valueOf(4);//使用包装类中的valueOf方法
+~~~
+
+包装对象---->基本数值
+
+~~~java
+int num = i.intValue();
+~~~
+
+**自动装箱与自动拆箱**
+
+由于我们经常要做基本类型与包装类之间的转换，从Java 5（JDK 1.5）开始，基本类型与包装类的装箱、拆箱动作可以自动完成。例如：
+
+```java
+Integer i = 4;//自动装箱。相当于Integer i = Integer.valueOf(4);
+i = i + 5;//等号右边：将i对象转成基本数值(自动拆箱) i.intValue() + 5;
+//加法运算完成后，再次装箱，把基本数值转成对象。
+```
+
+**基本类型转换为 String**
+
+~~~
+基本类型直接与””相连接即可；如：34+""
+~~~
+
++ `public static byte parseByte(String s)`：将字符串参数转换为对应的byte基本类型。
+
+- `public static short parseShort(String s)`：将字符串参数转换为对应的short基本类型。
+- `public static int parseInt(String s)`：将字符串参数转换为对应的int基本类型。
+- `public static long parseLong(String s)`：将字符串参数转换为对应的long基本类型。
+- `public static float parseFloat(String s)`：将字符串参数转换为对应的float基本类型。
+- `public static double parseDouble(String s)`：将字符串参数转换为对应的double基本类型。
+- `public static boolean parseBoolean(String s)`：将字符串参数转换为对应的boolean基本类型。
+
+代码使用（仅以Integer类的静态方法parseXxx为例）如：
+
+```java
+public class Demo18WrapperParse {
+    public static void main(String[] args) {
+        int num = Integer.parseInt("100");
+    }
+}
+```
+
+> 注意:如果字符串参数的内容无法正确转换为对应的基本类型，则会抛出`java.lang.NumberFormatException`异常。
+>
+
+---
+
+## 6 Collection、Map 集合
+
+### 6.1 Collection集合
+
+**概述**
+
+在前面基础班我们已经学习过并使用过集合ArrayList<E> ,那么集合到底是什么呢?
+
+* **集合**：集合是java中提供的一种容器，可以用来存储多个数据。
+
+集合和数组既然都是容器，它们有啥区别呢？
+
+* 数组的长度是固定的。集合的长度是可变的。
+* 数组中存储的是同一类型的元素，可以存储基本数据类型值。集合存储的都是对象。而且对象的类型可以不一致。在开发中一般当对象多的时候，使用集合进行存储。
+
+**集合框架**
+
+JAVASE提供了满足各种需求的API，在使用这些API前，先了解其继承与接口操作架构，才能了解何时采用哪个类，以及类之间如何彼此合作，从而达到灵活应用。
+
+集合按照其存储结构可以分为两大类，分别是单列集合`java.util.Collection`和双列集合`java.util.Map`
+
+* **Collection**：单列集合类的根接口，用于存储一系列符合某种规则的元素，它有两个重要的子接口，分别是`java.util.List`和`java.util.Set`。其中，`List`的特点是元素有序、元素可重复。`Set`的特点是元素无序，而且不可重复。`List`接口的主要实现类有`java.util.ArrayList`和`java.util.LinkedList`，`Set`接口的主要实现类有`java.util.HashSet`和`java.util.TreeSet`。
+
+**常用功能**
+
+Collection是所有单列集合的父接口，因此在Collection中定义了单列集合(List和Set)通用的一些方法，这些方法可用于操作所有的单列集合。方法如下：
+
+* `public boolean add(E e)`：  把给定的对象添加到当前集合中 。
+* `public void clear()` :清空集合中所有的元素。
+* `public boolean remove(E e)`: 把给定的对象在当前集合中删除。
+* `public boolean contains(E e)`: 判断当前集合中是否包含给定的对象。
+* `public boolean isEmpty()`: 判断当前集合是否为空。
+* `public int size()`: 返回集合中元素的个数。
+* `public Object[] toArray()`: 把集合中的元素，存储到数组中。
+
+方法演示：
+
+~~~java
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class Demo1Collection {
+    public static void main(String[] args) {
+		// 创建集合对象 
+    	// 使用多态形式
+    	Collection<String> coll = new ArrayList<String>();
+    	// 使用方法
+    	// 添加功能  boolean  add(String s)
+    	coll.add("小李广");
+    	coll.add("扫地僧");
+    	coll.add("石破天");
+    	System.out.println(coll);
+
+    	// boolean contains(E e) 判断o是否在集合中存在
+    	System.out.println("判断  扫地僧 是否在集合中"+coll.contains("扫地僧"));
+
+    	//boolean remove(E e) 删除在集合中的o元素
+    	System.out.println("删除石破天："+coll.remove("石破天"));
+    	System.out.println("操作之后集合中元素:"+coll);
+    	
+    	// size() 集合中有几个元素
+		System.out.println("集合中有"+coll.size()+"个元素");
+
+		// Object[] toArray()转换成一个Object数组
+    	Object[] objects = coll.toArray();
+    	// 遍历数组
+    	for (int i = 0; i < objects.length; i++) {
+			System.out.println(objects[i]);
+		}
+
+		// void  clear() 清空集合
+		coll.clear();
+		System.out.println("集合中内容为："+coll);
+		// boolean  isEmpty()  判断是否为空
+		System.out.println(coll.isEmpty());  	
+	}
+}
+
+运行结果:
+[小李广, 扫地僧, 石破天]
+判断  扫地僧 是否在集合中true
+删除石破天：true
+操作之后集合中元素:[小李广, 扫地僧]
+集合中有2个元素
+小李广
+扫地僧
+集合中内容为：[]
+true
+~~~
+
+> tips: 有关Collection中的方法可不止上面这些，其他方法可以自行查看API学习。
+
+---
+
+### 6.2 Iterator迭代器
+
+**Iterator接口**
+
+在程序开发中，经常需要遍历集合中的所有元素。针对这种需求，JDK专门提供了一个接口`java.util.Iterator`。`Iterator`接口也是Java集合中的一员，但它与`Collection`、`Map`接口有所不同，`Collection`接口与`Map`接口主要用于存储元素，而`Iterator`主要用于迭代访问（即遍历）`Collection`中的元素，因此`Iterator`对象也被称为迭代器。
+
+想要遍历Collection集合，那么就要获取该集合迭代器完成迭代操作，下面介绍一下获取迭代器的方法：
+
+* `public Iterator iterator()`: 获取集合对应的迭代器，用来遍历集合中的元素的。
+
+下面介绍一下迭代的概念：
+
+* **迭代**：即Collection集合元素的通用获取方式。在取元素之前先要判断集合中有没有元素，如果有，就把这个元素取出来，继续在判断，如果还有就再取出出来。一直把集合中的所有元素全部取出。这种取出方式专业术语称为迭代。
+
+Iterator接口的常用方法如下：
+
+* `public E next()`:返回迭代的下一个元素。
+* `public boolean hasNext()`:如果仍有元素可以迭代，则返回 true。
+
+接下来我们通过案例学习如何使用Iterator迭代集合中元素：
+
+~~~java
+public class IteratorDemo {
+  	public static void main(String[] args) {
+        // 使用多态方式 创建对象
+        Collection<String> coll = new ArrayList<String>();
+
+        // 添加元素到集合
+        coll.add("串串星人");
+        coll.add("吐槽星人");
+        coll.add("汪星人");
+        //遍历
+        //使用迭代器 遍历   每个集合对象都有自己的迭代器
+        Iterator<String> it = coll.iterator();
+        //  泛型指的是 迭代出 元素的数据类型
+        while(it.hasNext()){ //判断是否有迭代元素
+            String s = it.next();//获取迭代出的元素
+            System.out.println(s);
+        }
+  	}
+}
+
+运行结果：
+串串星人
+吐槽星人
+汪星人
+~~~
+
+> tips:：在进行集合元素取出时，如果集合中已经没有元素了，还继续使用迭代器的next方法，将会发生java.util.NoSuchElementException没有集合元素的错误。
+>
+> `coll.iterator();`获取迭代器的实现类对象，并把指针指向集合的-1位置
+
+**增强for**
+
+增强for循环(也称for each循环)是**JDK1.5**以后出来的一个高级for循环，专门用来遍历数组和集合的。它的内部原理其实是个Iterator迭代器，所以在遍历的过程中，不能对集合中的元素进行增删操作。
+
+格式：
+
+~~~java
+for(元素的数据类型  变量 : Collection集合or数组){ 
+  	//写操作代码
+}
+~~~
+
+它用于遍历Collection和数组。通常只进行遍历元素，不要在遍历的过程中对集合元素进行增删操作。
+
+```java
+public class NBFor {
+    public static void main(String[] args) {        
+    	Collection<String> coll = new ArrayList<String>();
+    	coll.add("小河神");
+    	coll.add("老河神");
+    	coll.add("神婆");
+    	//使用增强for遍历
+    	for(String s :coll){//接收变量s代表 代表被遍历到的集合元素
+    		System.out.println(s);
+    	}
+	}
+}
+```
+
+> tips: 新for循环必须有被遍历的目标。目标只能是Collection或者是数组。新式for仅仅作为遍历操作出现。
+
+---
+
+### 6.3 泛型
+
+在前面学习集合时，我们都知道集合中是可以存放任意对象的，只要把对象存储集合后，那么这时他们都会被提升成Object类型。当我们在取出每一个对象，并且进行相应的操作，这时必须采用类型转换。
+
++ **泛型**：可以在类或方法中预支地使用未知的类型。
+
+> tips:一般在创建对象时，将未知的类型确定具体的类型。当没有指定泛型时，默认类型为Object类型。
+
+**定义与使用**
+
+泛型，用来灵活地将数据类型应用到不同的类、方法、接口当中。将数据类型作为参数进行传递。
+
+定义格式：
+
+~~~
+修饰符 class 类名<代表泛型的变量> {  }
+~~~
+
+例如，API中的ArrayList集合：
+
+~~~java
+class ArrayList<E>{ 
+    public boolean add(E e){ }
+
+    public E get(int index){ }
+   	....
+}
+~~~
+
+使用泛型： 即什么时候确定泛型。
+
+**在创建对象的时候确定泛型**
+
+ 例如，`ArrayList<String> list = new ArrayList<String>();`
+
+此时，变量E的值就是String类型,那么我们的类型就可以理解为：
+
+~~~java 
+class ArrayList<String>{ 
+     public boolean add(String e){ }
+
+     public String get(int index){  }
+     ...
+}
+~~~
+
+**含有泛型的方法**
+
+定义格式：
+
+~~~
+修饰符 <代表泛型的变量> 返回值类型 方法名(参数){  }
+~~~
+
+**含有泛型的接口**
+
+定义格式：
+
+~~~
+修饰符 interface接口名<代表泛型的变量> {  }
+~~~
+
++ **泛型通配符**
+
+当使用泛型类或者接口时，传递的数据中，泛型类型不确定，可以通过通配符<?>表示。但是一旦使用泛型的通配符后，只能使用Object类中的共性方法，集合中元素自身方法无法使用。
+
+**通配符基本使用**
+
+泛型的通配符:**不知道使用什么类型来接收的时候,此时可以使用?,?表示未知通配符。**
+
+此时只能接受数据,不能往该集合中存储数据。
+
+~~~java
+public static void main(String[] args) {
+    Collection<Intger> list1 = new ArrayList<Integer>();
+    getElement(list1);
+    Collection<String> list2 = new ArrayList<String>();
+    getElement(list2);
+}
+public static void getElement(Collection<?> coll){}
+//？代表可以接收任意类型
+~~~
+
+> tips:泛型不存在继承关系 Collection<Object> list = new ArrayList<String>();这种是错误的。
+
+**通配符高级使用----受限泛型**
+
+之前设置泛型的时候，实际上是可以任意设置的，只要是类就可以设置。但是在JAVA的泛型中可以指定一个泛型的**上限**和**下限**。
+
+**泛型的上限**：
+
+* **格式**： `类型名称 <? extends 类 > 对象名称`
+* **意义**： `只能接收该类型及其子类`
+
+**泛型的下限**：
+
+- **格式**： `类型名称 <? super 类 > 对象名称`
+- **意义**： `只能接收该类型及其父类型`
+
+比如：现已知Object类，String 类，Number类，Integer类，其中Number是Integer的父类
+
+~~~java
+public static void main(String[] args) {
+    Collection<Integer> list1 = new ArrayList<Integer>();
+    Collection<String> list2 = new ArrayList<String>();
+    Collection<Number> list3 = new ArrayList<Number>();
+    Collection<Object> list4 = new ArrayList<Object>();
+    
+    getElement(list1);
+    getElement(list2);//报错
+    getElement(list3);
+    getElement(list4);//报错
+  
+    getElement2(list1);//报错
+    getElement2(list2);//报错
+    getElement2(list3);
+    getElement2(list4);
+  
+}
+// 泛型的上限：此时的泛型?，必须是Number类型或者Number类型的子类
+public static void getElement1(Collection<? extends Number> coll){}
+// 泛型的下限：此时的泛型?，必须是Number类型或者Number类型的父类
+public static void getElement2(Collection<? super Number> coll){}
+~~~
+
+---
+
++ **集合综合案例**
+
+**案例介绍**
+
+按照斗地主的规则，完成洗牌发牌的动作。
+具体规则：
+
+使用54张牌打乱顺序,三个玩家参与游戏，三人交替摸牌，每人17张牌，最后三张留作底牌。
+
+**案例分析**
+
+* 准备牌：
+
+  牌可以设计为一个ArrayList<String>,每个字符串为一张牌。
+  每张牌由花色数字两部分组成，我们可以使用花色集合与数字集合嵌套迭代完成每张牌的组装。
+  牌由Collections类的shuffle方法进行随机排序。
+
+* 发牌
+
+  将每个人以及底牌设计为ArrayList<String>,将最后3张牌直接存放于底牌，剩余牌通过对3取模依次发牌。
+
+
+* 看牌
+
+  直接打印每个集合。
+
+**代码实现**
+
+~~~java
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class Poker {
+    public static void main(String[] args) {
+        /*
+        * 1: 准备牌操作
+        */
+        //1.1 创建牌盒 将来存储牌面的 
+        ArrayList<String> pokerBox = new ArrayList<String>();
+        //1.2 创建花色集合
+        ArrayList<String> colors = new ArrayList<String>();
+
+        //1.3 创建数字集合
+        ArrayList<String> numbers = new ArrayList<String>();
+
+        //1.4 分别给花色 以及 数字集合添加元素
+        colors.add("♥");
+        colors.add("♦");
+        colors.add("♠");
+        colors.add("♣");
+
+        for(int i = 2;i<=10;i++){
+            numbers.add(i+"");
+        }
+        numbers.add("J");
+        numbers.add("Q");
+        numbers.add("K");
+        numbers.add("A");
+        //1.5 创造牌  拼接牌操作
+        // 拿出每一个花色  然后跟每一个数字 进行结合  存储到牌盒中
+        for (String color : colors) {
+            //color每一个花色 
+            //遍历数字集合
+            for(String number : numbers){
+                //结合
+                String card = color+number;
+                //存储到牌盒中
+                pokerBox.add(card);
+            }
+        }
+        //1.6大王小王
+        pokerBox.add("小☺");
+        pokerBox.add("大☠");	  
+        // System.out.println(pokerBox);
+        //洗牌 是不是就是将  牌盒中 牌的索引打乱 
+        // Collections类  工具类  都是 静态方法
+        // shuffer方法   
+        /*
+         * static void shuffle(List<?> list) 
+         *     使用默认随机源对指定列表进行置换。 
+         */
+        //2:洗牌
+        Collections.shuffle(pokerBox);
+        //3 发牌
+        //3.1 创建 三个 玩家集合  创建一个底牌集合
+        ArrayList<String> player1 = new ArrayList<String>();
+        ArrayList<String> player2 = new ArrayList<String>();
+        ArrayList<String> player3 = new ArrayList<String>();
+        ArrayList<String> dipai = new ArrayList<String>();	  
+
+        //遍历 牌盒  必须知道索引   
+        for(int i = 0;i<pokerBox.size();i++){
+            //获取 牌面
+            String card = pokerBox.get(i);
+            //留出三张底牌 存到 底牌集合中
+            if(i>=51){//存到底牌集合中
+                dipai.add(card);
+            } else {
+                //玩家1   %3  ==0
+                if(i%3==0){
+                  	player1.add(card);
+                }else if(i%3==1){//玩家2
+                  	player2.add(card);
+                }else{//玩家3
+                  	player3.add(card);
+                }
+            }
+        }
+        //看看
+        System.out.println("令狐冲："+player1);
+        System.out.println("田伯光："+player2);
+        System.out.println("绿竹翁："+player3);
+        System.out.println("底牌："+dipai);  
+	}
+}
+
+运行结果：
+令狐冲：[♠8, ♣6, ♣A, ♥3, ♣7, ♠9, 大☠, ♥K, ♠J, ♥Q, ♣9, ♠K, ♠6, ♦5, ♣4, ♥A, ♠10]
+田伯光：[♣2, ♦4, ♦A, ♥7, ♣Q, ♦8, ♥8, ♦9, ♣5, ♥J, ♠Q, ♥6, ♠3, ♥10, ♣J, ♠4, ♦2]
+绿竹翁：[♠7, ♠2, ♥9, ♠A, ♥2, ♥4, ♣K, ♣8, ♥5, 小☺, ♦6, ♣10, ♦3, ♦K, ♠5, ♣3, ♦J]
+底牌：[♦10, ♦Q, ♦7]
+~~~
+
+---
+
+### 6.4 List 集合
+
+#### List
+
+`java.util.List`接口继承自`Collection`接口，是单列集合的一个重要分支，习惯性地会将实现了`List`接口的对象称为List集合。在List集合中允许出现重复的元素，所有的元素是以一种线性方式进行存储的，在程序中可以通过索引来访问集合中的指定元素。另外，List集合还有一个特点就是元素有序，即元素的存入顺序和取出顺序一致。
+
+> tips:我们在基础班的时候已经学习过List接口的子类java.util.ArrayList类，该类中的方法都是来自List中定义。
+
+**常用方法**
+
+List作为Collection集合的子接口，不但继承了Collection接口中的全部方法，而且还增加了一些根据元素索引来操作集合的特有方法，如下：
+
+- `public void add(int index, E element)`: 将指定的元素，添加到该集合中的指定位置上。
+- `public E get(int index)`:返回集合中指定位置的元素。
+- `public E remove(int index)`: 移除列表中指定位置的元素, 返回的是被移除的元素。
+- `public E set(int index, E element)`:用指定元素替换集合中指定位置的元素,返回值的更新前的元素。
+
+List集合特有的方法都是跟索引相关
+
+```java
+public class ListDemo {
+    public static void main(String[] args) {
+		// 创建List集合对象
+    	List<String> list = new ArrayList<String>();
+    	
+    	// 往 尾部添加 指定元素
+    	list.add("图图");
+    	list.add("小美");
+    	list.add("不高兴");
+    	
+    	System.out.println(list);
+    	// add(int index,String s) 往指定位置添加
+    	list.add(1,"没头脑");
+    	
+    	System.out.println(list);
+    	// String remove(int index) 删除指定位置元素  返回被删除元素
+    	// 删除索引位置为2的元素 
+    	System.out.println("删除索引位置为2的元素");
+    	System.out.println(list.remove(2));
+    	
+    	System.out.println(list);
+    	
+    	// String set(int index,String s)
+    	// 在指定位置 进行 元素替代（改） 
+    	// 修改指定位置元素
+    	list.set(0, "三毛");
+    	System.out.println(list);
+    	
+    	// String get(int index)  获取指定位置元素
+    	
+    	// 跟size() 方法一起用  来 遍历的 
+    	for(int i = 0;i<list.size();i++){
+    		System.out.println(list.get(i));
+    	}
+    	//还可以使用增强for
+    	for (String string : list) {
+			System.out.println(string);
+		}  	
+	}
+}
+
+运行结果：
+[图图, 小美, 不高兴]
+[图图, 没头脑, 小美, 不高兴]
+删除索引位置为2的元素
+小美
+[图图, 没头脑, 不高兴]
+[三毛, 没头脑, 不高兴]
+三毛
+没头脑
+不高兴
+三毛
+没头脑
+不高兴
+```
+
+---
+
+**（ List子类 ）**
+
+#### ArrayList集合
+
+`java.util.ArrayList`集合数据存储的结构是**数组结构**。元素增删慢，查找快，由于日常开发中使用最多的功能为查询数据、遍历数据，所以`ArrayList`是最常用的集合。
+
+---
+
+#### LinkedList集合
+
+`java.util.LinkedList`集合数据存储的结构是**链表结构**。方便元素添加、删除的集合。
+
+>  LinkedList是一个双向链表
+
+实际开发中对一个集合元素的添加与删除经常涉及到首尾操作，而LinkedList提供了大量首尾操作的方法。这些方法我们作为了解即可：
+
+* `public void addFirst(E e)`:将指定元素插入此列表的开头。
+* `public void addLast(E e)`:将指定元素添加到此列表的结尾。
+* `public E getFirst()`:返回此列表的第一个元素。
+* `public E getLast()`:返回此列表的最后一个元素。
+* `public E removeFirst()`:移除并返回此列表的第一个元素。
+* `public E removeLast()`:移除并返回此列表的最后一个元素。
+* `public E pop()`:从此列表所表示的堆栈处弹出一个元素。
+* `public void push(E e)`:将元素推入此列表所表示的堆栈。
+* `public boolean isEmpty()`：如果列表不包含元素，则返回true。
+
+LinkedList是List的子类，List中的方法LinkedList都是可以使用，这里就不做详细介绍，我们只需要了解LinkedList的特有方法即可。在开发时，LinkedList集合也可以作为堆栈，队列的结构使用。（了解即可）
+
+方法演示：
+
+~~~java
+public class LinkedListDemo {
+    public static void main(String[] args) {
+        LinkedList<String> link = new LinkedList<String>();
+        //添加元素
+        link.addFirst("abc1");
+        link.addFirst("abc2");
+        link.addFirst("abc3");
+        System.out.println(link);
+        // 获取元素
+        System.out.println(link.getFirst());
+        System.out.println(link.getLast());
+        // 删除元素
+        System.out.println(link.removeFirst());
+        System.out.println(link.removeLast());
+
+        while (!link.isEmpty()) { //判断集合是否为空
+            System.out.println(link.pop()); //弹出集合中的栈顶元素
+        }
+
+        System.out.println(link);
+    }
+}
+
+运行结果：
+[abc3, abc2, abc1]
+abc3
+abc1
+abc3
+abc1
+abc2
+[]
+~~~
+
+---
+
+### 6.5 set 集合
+
+`java.util.Set`接口和`java.util.List`接口一样，同样继承自`Collection`接口，它与`Collection`接口中的方法基本一致，并没有对`Collection`接口进行功能上的扩充，只是比`Collection`接口更加严格了。与`List`接口不同的是，`Set`接口中元素**无序**，并且都会以某种规则保证存入的元素**不出现重复**。
+
+`Set`集合有多个子类，这里我们介绍其中的`java.util.HashSet`、`java.util.LinkedHashSet`这两个集合。
+
+> tips:Set集合取出元素的方式可以采用：迭代器、增强for。
+
+---
+
+#### HashSet
+
+**介绍**
+
+哈希值：是JDK根据对象的地址或者字符串或者数字算出来的int类型的数值
+
+`java.util.HashSet`是`Set`接口的一个实现类，它所存储的元素是不可重复的，并且元素都是无序的(即存取顺序不一致)。`java.util.HashSet`底层的实现其实是一个`java.util.HashMap`支持
+
+`HashSet`是根据对象的哈希值来确定元素在集合中的存储位置，因此具有良好的存取和查找性能。保证元素唯一性的方式依赖于：`hashCode`与`equals`方法。
+
+**结构**
+
+什么是哈希表呢？
+
+在**JDK1.8**之前，哈希表底层采用数组+链表实现，即使用链表处理冲突，同一hash值的链表都存储在一个链表里。但是当位于一个桶中的元素较多，即hash值相等的元素较多时，通过key值依次查找的效率较低。而JDK1.8中，哈希表存储采用数组+链表+红黑树实现，当链表长度超过阈值（8）时，将链表转换为红黑树，这样大大减少了查找时间。
+
+**判断标准**
+
+存入的元素和以前的哈希值比较，如果哈希值不同，会继续向下执行，把元素添加到集合，如果哈希值相同，则调用equals()方法比较，如果返回false，则继续向下执行把元素添加到集合，如果返回true，说明元素重复，不存储。
+
+**存储自定义类型元素**
+
+给HashSet中存放**自定义类型**元素时，由于系统无法自己比较自定义类型是否相同，因此**需要重写**对象中的hashCode和equals方法，建立自己的比较方式，才能保证HashSet集合中的对象唯一
+
+创建自定义Student类
+
+~~~java
+public class Student {
+    private String name;
+    private int age;
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+  	@Override  //使输出为内容而非地址
+    public String toString() {
+        return "Student{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+  
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Student student = (Student) o;
+        return age == student.age &&
+               Objects.equals(name, student.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, age);
+    }
+}
+~~~
+
+~~~java
+public class HashSetDemo2 {
+    public static void main(String[] args) {
+        //创建集合对象   该集合中存储 Student类型对象
+        HashSet<Student> stuSet = new HashSet<Student>();
+        //存储 
+        Student stu = new Student("于谦", 43);
+        stuSet.add(stu);
+        stuSet.add(new Student("郭德纲", 44));
+        stuSet.add(new Student("于谦", 43));
+        stuSet.add(new Student("郭麒麟", 23));
+        stuSet.add(stu);
+
+        for (Student stu2 : stuSet) {
+            System.out.println(stu2);
+        }
+    }
+}
+执行结果：
+Student [name=郭德纲, age=44]
+Student [name=于谦, age=43]
+Student [name=郭麒麟, age=23]
+~~~
+
+#### LinkedHashSet
+
+>  在HashSet基础上有序排列，同样不能有重复元素
+
+在HashSet下面有一个子类`java.util.LinkedHashSet`，它是链表和哈希表组合的一个数据存储结构。
+
+演示代码如下:
+
+~~~java
+public class LinkedHashSetDemo {
+	public static void main(String[] args) {
+		Set<String> set = new LinkedHashSet<String>();
+		set.add("bbb");
+		set.add("aaa");
+		set.add("abc");
+		set.add("bbb");
+        Iterator<String> it = set.iterator();
+		while (it.hasNext()) {
+			System.out.println(it.next());
+		}
+	}
+}
+结果：
+  bbb
+  aaa
+  abc
+~~~
+
+---
+
+### 6.6 Collections
+
+`java.utils.Collections`是集合工具类，用来对集合进行操作。部分方法如下：
+
+**常用功能 (静态方法，直接使用，无需对象)**
+
+- `public static <T> boolean addAll(Collection<T> c, T... elements)  `:往集合中添加一些元素。
+- `public static void shuffle(List<?> list) 打乱顺序`:打乱集合顺序。
+- `public static <T> void sort(List<T> list)`:将集合中元素按照默认规则排序。
+- `public static <T> void sort(List<T> list，Comparator<? super T> )`:将集合中元素按照指定规则排序。
+
+代码演示：
+
+```java
+public class CollectionsDemo {
+    public static void main(String[] args) {
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        //原来写法
+        //list.add(12);
+        //list.add(14);
+        //list.add(15);
+        //list.add(1000);
+        //采用工具类 完成 往集合中添加元素  
+        Collections.addAll(list, 5, 222, 1，2);
+        System.out.println(list);
+        //排序方法 
+        Collections.sort(list);
+        System.out.println(list);
+    }
+}
+结果：
+[5, 222, 1, 2]
+[1, 2, 5, 222]
+```
+
+ **Comparator比较器**
+
+> `public static <T> void sort(List<T> list)`:将集合中元素按照默认规则排序
+
+> ` public int compare(String o1, String o2)`：比较其两个参数的顺序。
+>
+> 两个对象比较的结果有三种：大于，等于，小于。
+>
+> 如果要按照升序排序，
+> 则o1 小于o2，返回（负数），相等返回0，01大于02返回（正数）
+> 如果要按照降序排序
+> 则o1 小于o2，返回（正数），相等返回0，01大于02返回（负数）
+
+```java
+public class CollectionsDemo3 {
+    public static void main(String[] args) {
+        ArrayList<String> list = new ArrayList<String>();
+        list.add("cba");
+        list.add("aba");
+        list.add("sba");
+        list.add("nba");
+        //排序方法  按照第一个单词的降序
+        Collections.sort(list, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o2.charAt(0) - o1.charAt(0);
+            }
+        });
+        System.out.println(list);
+    }
+}
+```
+
+**练习**
+
+Student 初始类
+
+~~~java
+public class Student implements Comparable<Student>{
+    private String name;
+    private int age;
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+               "name='" + name + '\'' +
+               ", age=" + age +
+               '}';
+    }
+  
+    @Override
+    public int compareTo(Student o) {
+        return this.age-o.age;//升序
+    }
+}
+~~~
+
+测试类：
+
+~~~java
+public class Demo {
+
+    public static void main(String[] args) {
+        // 创建四个学生对象 存储到集合中
+        ArrayList<Student> list = new ArrayList<Student>();
+
+        list.add(new Student("rose",18));
+        list.add(new Student("jack",16));
+        list.add(new Student("abc",16));
+        list.add(new Student("ace",17));
+        list.add(new Student("mark",16));
+    
+        Collections.sort(list);
+
+        for (Student student : list) {
+            System.out.println(student);
+        }
+    }
+}
+~~~
+
+~~~java
+Student{name='jack', age=16}
+Student{name='abc', age=16}
+Student{name='mark', age=16}
+Student{name='ace', age=17}
+Student{name='rose', age=18}
+~~~
+
+> ⚠️  形参在前的顺序排
+
+**扩展：**如果想要规则更多一些，可以参考下面代码：
+
+~~~java
+Collections.sort(list, new Comparator<Student>() {
+            @Override
+            public int compare(Student o1, Student o2) {
+                // 年龄降序
+                int result = o2.getAge()-o1.getAge();//年龄降序
+
+                if(result==0){//第一个规则判断完了 下一个规则 姓名的首字母 升序
+                    result = o1.getName().charAt(0)-o2.getName().charAt(0);
+                }
+
+                return result;
+            }
+        });
+~~~
+
+> **两种自定义规则：**
+>
+> 在定义类中需要继承`implements Comparable<Student>`，然后重写`public int compareTo`
+>
+> 在本类中可以用
+>
+> ```java
+> Collections.sort(list, new Comparator<String>() {
+>             @Override
+>             public int compare(String o1, String o2) {
+>                 return o2.charAt(0) - o1.charAt(0);
+>             }
+>         });
+> ```
+
+---
+
+### 6.7 Map 集合
+
+#### Map
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 附录
 
 ![](jpg/IMG_6183.jpg)
