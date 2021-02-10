@@ -3732,6 +3732,151 @@ cn.text3.RegisterException: 亲bill已经被注册了！
 
 ## 8 多线程
 
+### 8.1 线程
+
+**概念**
+
+* **并发**：指两个或多个事件在**同一个时间段内**发生
+* **并行**：指两个或多个事件在**同一时刻**发生（同时发生）
+
+* **进程**：是指一个内存中运行的应用程序，每个进程都有一个独立的内存空间，一个应用程序可以同时运行多个进程；进程也是程序的一次执行过程，是系统运行程序的基本单位；系统运行一个程序即是一个进程从创建、运行到消亡的过程。
+
+* **线程**：线程是进程中的一个执行单元，负责当前进程中程序的执行，一个进程中至少有一个线程。一个进程中是可以有多个线程的，这个应用程序也可以称之为多线程程序。 
+
+  简而言之：一个程序运行后至少有一个进程，一个进程中可以包含多个线程 
+
+---
+
+**多线程的创建**
+
+**方式一：Thread 类**
+
+> 1. 定义子类继承Thread类。
+>
+> 2. 子类中重写Thread类中的run方法。（ run()方法的方法体就代表了线程需要完成的任务,因此把run()方法称为线程执行体 ）
+>
+> 3. 创建Thread子类对象，即创建了线程对象。
+>
+> 4. 调用线程对象start方法: 启动线程，调用run方法。
+
+~~~java
+public class Demo01 {
+	public static void main(String[] args) {
+		//创建自定义线程对象
+		MyThread mt = new MyThread("新的线程！");
+		//开启新线程
+		mt.start();
+		//在主方法中执行for循环
+		for (int i = 0; i < 10; i++) {
+			System.out.println("main线程！"+i);
+		}
+	}
+}
+~~~
+
+自定义线程类：
+
+~~~java
+public class MyThread extends Thread {
+	//定义指定线程名称的构造方法
+	public MyThread(String name) {
+		//调用父类的String参数的构造方法，指定线程的名称
+		super(name);
+	}
+	/**
+	 * 重写run方法，完成该线程执行的逻辑
+	 */
+	@Override
+	public void run() {
+		for (int i = 0; i < 10; i++) {
+			System.out.println(getName()+"：正在执行！"+i);
+		}
+	}
+}
+~~~
+
+**构造方法：**
+
++ `public Thread()` :分配一个新的线程对象。
++ `public Thread(String name)` :分配一个指定名字的新的线程对象。
++ `public Thread(Runnable target)` :分配一个带有指定目标新的线程对象。
++ `public Thread(Runnable target,String name)` :分配一个带有指定目标新的线程对象并指定名字。
+
+**常用方法：**
+
++ `public String getName()` :获取当前线程名称。
++ `public void start()` :导致此线程开始执行; Java虚拟机调用此线程的run方法。
++ `public void run()` :此线程要执行的任务在此处定义代码。
++ `public static void sleep(long millis)` :使当前正在执行的线程以指定的毫秒数暂停（暂时停止执行）。
++ `public static Thread currentThread()` :返回对当前正在执行的线程对象的引用
+
+---
+
+**方式二：Runnable 接口**
+
+采用 `java.lang.Runnable` 也是非常常见的一种，我们只需要重写run方法即可。
+
+> 1. 定义Runnable接口的实现类，并重写该接口的run()方法
+> 2. 创建Runnable实现类的实例，并以此实例作为Thread的target来创建Thread对象，该Thread对象才是真正的线程对象。
+>
+> 3. 调用线程对象的start()方法来启动线程。
+
+```java
+public class Demo01 {
+    public static void main(String[] args) {
+//创建自定义类对象 线程任务对象
+        MyRunnable mr = new MyRunnable();
+//创建线程对象
+        Thread t = new Thread(mr,
+                "小强");
+        t.start();
+        for (int i = 0; i < 20; i++) {
+            System.out.println("旺财 " + i);
+        }
+    }
+}
+
+class MyRunnable implements Runnable{
+    @Override
+    public void run() {
+        for (int i = 0; i < 20; i++) {
+            System.out.println(Thread.currentThread().getName()+" "+i);
+        }
+    }
+}
+```
+
+> **实现`Runnable接口`比继承`Thread类`所具有的优势：**
+>
+> 1. 适合多个相同的程序代码的线程去共享同一个资源。
+> 2. 可以避免java中的单继承的局限性。
+> 3. 增加程序的健壮性，实现解耦操作，代码可以被多个线程共享，代码和线程独立。
+> 4. 线程池只能放入实现Runable或Callable类线程，不能直接放入继承Thread的类。
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
