@@ -3107,11 +3107,630 @@ Collections.sort(list, new Comparator<Student>() {
 
 #### Map
 
+现实生活中，我们常会看到这样的一种集合：IP地址与主机名，身份证号与个人，系统用户名与系统用户对象等，这种一一对应的关系，就叫做映射。Java提供了专门的集合类用来存放这种对象关系的对象，即`java.util.Map`接口。
 
+> `Collection<E>` 接口定义了单列集合规范
+>
+> `Map<K, V>` 接口定义了双集合规范，K代表键的类型，V代表值的类型
 
+⚠️  需要注意的是，`Map`中的集合不能包含重复的键，值可以重复；每个键只能对应一个值
 
+---
 
+**Map常用子类**
 
+#### HashMap
+
+> **HashMap<K,V>**：存储数据采用的哈希表结构，元素的存取顺序(元素输入顺序）不能保证一致，key值顺序排列。由于要保证键的唯一、不重复，需要重写键的hashCode()方法、equals()方法（自定义数据类型）
+>
+> K实际上是一个set集合(不能是其子类)
+>
+> **输入无序，key值排列**
+
+**常用方法**
+
+* `public V put(K key, V value)`:  把指定的键与指定的值添加到Map集合中。
+* `public V remove(Object key)`: 把指定的键 所对应的键值对元素 在Map集合中删除，返回被删除元素的值。
+* `public V get(Object key)` 根据指定的键，在Map集合中获取对应的值。
+* `boolean containsKey(Object key)  ` 判断集合中是否包含指定的键。
+* `public Set<K> keySet()`: 获取Map集合中所有的键，存储到Set集合中。
+* `public Set<Map.Entry<K,V>> entrySet()`: 获取到Map集合中所有的键值对对象的集合(Set集合)。
+
+~~~java
+public class MapDemo {
+    public static void main(String[] args) {
+        //创建 map对象
+        HashMap<String, String>  map = new HashMap<String, String>();
+
+        //添加元素到集合
+        map.put("黄晓明", "杨颖");
+        map.put("文章", "马伊琍");
+        map.put("邓超", "孙俪");
+        System.out.println(map);
+
+        //String remove(String key)
+        System.out.println(map.remove("邓超"));
+        System.out.println(map);
+
+        // 想要查看 黄晓明的媳妇 是谁
+        System.out.println(map.get("黄晓明"));
+        System.out.println(map.get("邓超"));    
+    }
+}
+
+运行结果：
+{邓超=孙俪, 文章=马伊琍, 黄晓明=杨颖}
+孙俪
+{文章=马伊琍, 黄晓明=杨颖}
+杨颖
+null
+~~~
+
+> tips:
+>
+> 使用put方法时，若指定的键(key)在集合中没有，则没有这个键对应的值，返回null，并把指定的键值添加到集合中； 
+>
+> 若指定的键(key)在集合中存在，则返回值为集合中键对应的值（该值为替换前的值），并把指定键所对应的值，替换成指定的新值。 
+
+**遍历键找值方式**
+
++ `public Set<K> keySet()`: 获取Map集合中所有的键，存储到Set集合中。
+
+分析步骤：
+
+1. 获取Map中所有的键，由于键是唯一的，所以返回一个Set集合存储所有的键。方法提示:`keyset()`
+2. 遍历键的Set集合，得到每一个键。
+3. 根据键，获取键所对应的值。方法提示:`get(K key)`
+
+```java
+public class MapDemo01 {
+    public static void main(String[] args) {
+        //创建Map集合对象 
+        HashMap<String, String> map = new HashMap<String,String>();
+        //添加元素到集合 
+        map.put("胡歌", "霍建华");
+        map.put("郭德纲", "于谦");
+        map.put("薛之谦", "大张伟");
+
+        //获取所有的键  获取键集
+        Set<String> keys = map.keySet();
+        // 遍历键集 得到 每一个键
+        for (String key : keys) {
+          	//key  就是键
+            //获取对应值
+            String value = map.get(key);
+            System.out.println(key+"的CP是："+value);
+        }  
+    }
+}
+```
+
+**Entry键值对对象**
+
+我们已经知道，`Map`中存放的是两种对象，一种称为**key**(键)，一种称为**value**(值)，它们在在`Map`中是一一对应关系，这一对对象又称做`Map`中的一个`Entry(项)`。`Entry`将键值对的对应关系封装成了对象。即键值对对象，这样我们在遍历`Map`集合时，就可以从每一个键值对（`Entry`）对象中获取对应的键与对应的值。
+
+ 既然Entry表示了一对键和值，那么也同样提供了获取对应键和对应值得方法：
+
+* `public K getKey()`：获取Entry对象中的键。
+* `public V getValue()`：获取Entry对象中的值。
+
+在Map集合中也提供了获取所有Entry对象的方法：
+
+* `public Set<Map.Entry<K,V>> entrySet()`: 获取到Map集合中所有的键值对对象的集合(Set集合)----将Entry封装的类当成元素放到set集合中进行遍历
+
+**遍历键值对方式**
+
+键值对方式：即通过集合中每个键值对(Entry)对象，获取键值对(Entry)对象中的键与值。
+
+操作步骤与图解：
+
+1.  获取Map集合中，所有的键值对(Entry)对象，以Set集合形式返回。方法提示:`entrySet()`。
+
+2.  遍历包含键值对(Entry)对象的Set集合，得到每一个键值对(Entry)对象。
+3.  通过键值对(Entry)对象，获取Entry对象中的键与值。  方法提示:`getkey() getValue()`     
+
+~~~java
+public class MapDemo02 {
+    public static void main(String[] args) {
+        // 创建Map集合对象 
+        HashMap<String, String> map = new HashMap<String,String>();
+        // 添加元素到集合 
+        map.put("胡歌", "霍建华");
+        map.put("郭德纲", "于谦");
+        map.put("薛之谦", "大张伟");
+
+        // 获取 所有的 entry对象  entrySet
+        Set<Entry<String,String>> entrySet = map.entrySet();
+
+        // 遍历得到每一个entry对象
+        for (Entry<String, String> entry : entrySet) {
+           	// 解析 
+            String key = entry.getKey();
+            String value = entry.getValue();  
+            System.out.println(key+"的CP是:"+value);
+        }
+    }
+}
+~~~
+
+> tips：Map集合不能直接使用迭代器或者foreach进行遍历。但是转成Set之后就可以使用了。
+
+**存储自定义类型键值**
+
+练习：每位学生（姓名，年龄）都有自己的家庭住址。那么，既然有对应关系，则将学生对象和家庭住址存储到map集合中。学生作为键, 家庭住址作为值。
+
+> 注意，学生姓名相同并且年龄相同视为同一名学生。
+
+编写学生类：
+
+~~~java
+public class Student {
+    private String name;
+    private int age;
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Student student = (Student) o;
+        return age == student.age && Objects.equals(name, student.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, age);
+    }
+}
+~~~
+
+编写测试类：
+
+~~~java 
+public class HashMapTest {
+    public static void main(String[] args) {
+        //1,创建Hashmap集合对象。
+        Map<Student,String>map = new HashMap<Student,String>();
+        //2,添加元素。
+        map.put(newStudent("lisi",28), "上海");
+        map.put(newStudent("wangwu",22), "北京");
+        map.put(newStudent("zhaoliu",24), "成都");
+        map.put(newStudent("zhouqi",25), "广州");
+        map.put(newStudent("wangwu",22), "南京");
+        
+        //3,取出元素。键找值方式
+        Set<Student>keySet = map.keySet();
+        for(Student key: keySet){
+            Stringvalue = map.get(key);
+            System.out.println(key.toString()+"....."+value);
+        }
+    }
+}
+~~~
+
+* 当给HashMap中存放自定义对象时，如果自定义对象作为key存在，这时要保证对象唯一，必须复写对象的hashCode和equals方法(如果忘记，请回顾HashSet存放自定义对象)。
+* 如果要保证map中存放的key和取出的顺序一致，可以使用`java.util.LinkedHashMap`集合来存放。
+
+#### LinkedHashMap
+
+> **LinkedHashMap<K,V>**：HashMap下有个子类LinkedHashMap，存储数据采用的哈希表结构+链表结构。通过链表结构可以保证元素的存取顺序（元素输入顺序）一致，不按照key值排序；通过哈希表结构可以保证的键的唯一、不重复，需要重写键的hashCode()方法, equals()方法。
+>
+> **输入顺序排序，key值不排序**
+
+~~~java
+public class LinkedHashMapDemo {
+    public static void main(String[] args) {
+        LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+        map.put("邓超", "孙俪");
+        map.put("李晨", "范冰冰");
+        map.put("刘德华", "朱丽倩");
+        Set<Entry<String, String>> entrySet = map.entrySet();
+        for (Entry<String, String> entry : entrySet) {
+            System.out.println(entry.getKey() + "  " + entry.getValue());
+        }
+    }
+}
+~~~
+
+结果:
+
+~~~
+邓超  孙俪
+李晨  范冰冰
+刘德华  朱丽倩
+~~~
+
+---
+
+## 7 异常处理
+
+### 7.1 异常
+
+**异常概念**
+
+异常，就是不正常的意思。在生活中:医生说,你的身体某个部位有异常,该部位和正常相比有点不同,该部位的功能将受影响.在程序中的意思就是：
+
+* **异常** ：指的是程序在执行过程中，出现的非正常的情况，最终会导致JVM的非正常停止。
+
+在Java等面向对象的编程语言中，异常本身是一个类，产生异常就是创建异常对象并抛出了一个异常对象。Java处理异常的方式是中断处理。
+
+> 异常指的并不是语法错误,语法错了,编译不通过,不会产生字节码文件,根本不能运行.
+
+---
+
+**异常体系**
+
+异常机制其实是帮助我们**找到**程序中的问题，异常的根类是`java.lang.Throwable`，其下有两个子类：`java.lang.Error`与`java.lang.Exception`，平常所说的异常指`java.lang.Exception`。
+
+**Throwable体系：**
+
+* **Error**: 严重错误Error，无法通过处理的错误，只能事先避免，好比绝症。
+* **Exception**: 表示异常，异常产生后程序员可以通过代码的方式纠正，使程序继续运行，是必须要处理的。好比感冒、阑尾炎。
+
+**Throwable中的常用方法：**
+
+* `public void printStackTrace()`: 打印异常的详细信息。
+
+  > 包含了异常的类型，异常的原因，还包括异常出现的位置，在开发和调试阶段，都得使用printStackTrace
+
+* `public String getMessage()`: 获取发生异常的原因。
+
+  > 提示给用户的时候，就提示错误原因
+
+* `public String toString()`: 获取异常的类型和异常描述信息(不用)。
+
+---
+
+**异常分类**
+
+我们平常说的异常就是指Exception，因为这类异常一旦出现，我们就要对代码进行更正，修复程序。
+
+**异常(Exception)的分类**:根据在编译时期还是运行时期去检查异常?
+
+* **编译时期异常**: 必须显示处理，否则程序就会发生错误，无法通过编译
+* **运行时期异常**: 无需显示处理，也可以和编译时异常一样处理
+
+[异常产生过程解析](#异常产生过程解析)
+
+---
+
+### 7.2 异常的处理
+
+**抛出异常throw**
+
+在java中，提供了一个**throw**关键字，它用来抛出一个指定的异常对象。
+
+1. 创建一个异常对象。封装一些提示信息(信息可以自己编写)。
+
+2. 需要将这个异常对象告知给调用者。怎么告知呢？怎么将这个异常对象传递到调用者处呢？通过关键字throw就可以完成。throw 异常对象。
+
+   throw**用在方法内**，用来抛出一个异常对象，将这个异常对象传递到调用者处，并结束当前方法的执行。
+
+**使用格式：**
+
+~~~
+throw new 异常类名(参数);
+~~~
+
+ 例如：
+
+~~~java
+throw new NullPointerException("要访问的arr数组不存在");
+
+throw new ArrayIndexOutOfBoundsException("该索引在数组中不存在，已超出范围");
+~~~
+
+学习完抛出异常的格式后，我们通过下面程序演示下throw的使用。
+
+~~~java
+public class ThrowDemo {
+    public static void main(String[] args) {
+        //创建一个数组 
+        int[] arr = {2,4,52,2};
+        //根据索引找对应的元素 
+        int index = 4;
+        int element = getElement(arr, index);
+
+        System.out.println(element);
+        System.out.println("over");
+    }
+    /*
+     * 根据 索引找到数组中对应的元素
+     */
+    public static int getElement(int[] arr,int index){ 
+       	//判断  索引是否越界
+        if(index<0 || index>arr.length-1){
+             /*
+             判断条件如果满足，当执行完throw抛出异常对象后，方法已经无法继续运算。
+             这时就会结束当前方法的执行，并将异常告知给调用者。这时就需要通过异常来解决。 
+              */
+             throw new ArrayIndexOutOfBoundsException("哥们，角标越界了~~~");
+        }
+        int element = arr[index];
+        return element;
+    }
+}
+~~~
+
+> 注意：如果产生了问题，我们就会throw将问题描述类即异常进行抛出，也就是将问题返回给该方法的调用者。
+>
+> 那么对于调用者来说，该怎么处理呢？一种是进行捕获处理，另一种就是继续讲问题声明出去，使用throws声明处理。
+
+---
+
+**声明异常throws**
+
+**声明异常**：将问题标识出来，报告给调用者。如果方法内通过throw抛出了编译时异常，而没有捕获处理（稍后讲解该方式），那么必须通过throws进行声明，让调用者去处理。
+
+关键字**throws**运用于方法声明之上,用于表示当前方法不处理异常,而是提醒该方法的调用者来处理异常(抛出异常).
+
+**声明异常格式：**
+
+~~~
+修饰符 返回值类型 方法名(参数) throws 异常类名1,异常类名2…{   }	
+~~~
+
+声明异常的代码演示：
+
+~~~java
+public class ThrowsDemo {
+    public static void main(String[] args) throws FileNotFoundException {
+        read("a.txt");
+    }
+
+    // 如果定义功能时有问题发生需要报告给调用者。可以通过在方法上使用throws关键字进行声明
+    public static void read(String path) throws FileNotFoundException {
+        if (!path.equals("a.txt")) {//如果不是 a.txt这个文件 
+            // 我假设  如果不是 a.txt 认为 该文件不存在 是一个错误 也就是异常  throw
+            throw new FileNotFoundException("文件不存在");
+        }
+    }
+}
+~~~
+
+throws用于进行异常类的声明，若该方法可能有多种异常情况产生，那么在throws后面可以写多个异常类，用逗号隔开。
+
+~~~java
+public class ThrowsDemo2 {
+    public static void main(String[] args) throws IOException {
+        read("a.txt");
+    }
+
+    public static void read(String path)throws FileNotFoundException, IOException {
+        if (!path.equals("a.txt")) {//如果不是 a.txt这个文件 
+            // 我假设  如果不是 a.txt 认为 该文件不存在 是一个错误 也就是异常  throw
+            throw new FileNotFoundException("文件不存在");
+        }
+        if (!path.equals("b.txt")) {
+            throw new IOException();
+        }
+    }
+}
+~~~
+
+> **throws**
+>
+> 用在方法声明后面，跟的是异常类名
+>
+> 表示抛出异常，由该方法的调用者来处理
+>
+> 表示出现异常的一种可能性，并不一定会发生这些异常
+>
+> **throw**
+>
+> 用在方法体内，跟的是异常对象名
+>
+> 表示抛出异常，由方法体内的语句处理
+>
+> 执行 throw 一定抛出了某种异常
+
+---
+
+**捕获异常try…catch**
+
+如果异常出现的话,会立刻终止程序,所以我们得处理异常
+
+**try-catch**的方式就是捕获异常。
+
+* **捕获异常**：Java中对异常有针对性的语句进行捕获，可以对出现的异常进行指定方式的处理。
+
+捕获异常语法如下：
+
+~~~java
+try{
+     编写可能会出现异常的代码
+}catch(异常类型A  e){ //当try中出现异常类型A，就用该catch来捕获
+     处理异常的代码
+     //记录日志/打印异常信息/继续抛出异常
+}
+~~~
+
+**try：**该代码块中编写可能产生异常的代码。
+
+**catch：**用来进行某种异常的捕获，实现对捕获到的异常进行处理。
+
+> 注意:try和catch都不能单独使用,必须连用。
+
+> **执行流程：**
+>
+> 程序从 try 里面的代码开始执行
+>
+> 出现异常，会自动生成一个异常类对象，该异常对象将被提交给Java运行时系统
+>
+> 当Java运行时系统接收到异常对象时，会到catch中去找匹配的异常类，找到后进行异常的处理
+>
+> 执行完毕之后，程序还可以继续往下执行
+
+演示如下：
+
+~~~java
+public class TryCatchDemo {
+    public static void main(String[] args) {
+        try {// 当产生异常时，必须有处理方式。要么捕获，要么声明。
+            read("b.txt");
+        } catch (FileNotFoundException e) {// 括号中需要定义什么呢？
+          	//try中抛出的是什么异常，在括号中就定义什么异常类型
+            System.out.println(e);
+        }
+        System.out.println("over");
+    }
+    /*
+     *
+     * 我们 当前的这个方法中 有异常  有编译期异常
+     */
+    public static void read(String path) throws FileNotFoundException {
+        if (!path.equals("a.txt")) {//如果不是 a.txt这个文件 
+            // 我假设  如果不是 a.txt 认为 该文件不存在 是一个错误 也就是异常  throw
+            throw new FileNotFoundException("文件不存在");
+        }
+    }
+}
+~~~
+
+> **try...catch:** 会处理异常，程序继续执行
+>
+> **thorws、thorw：**将异常传球，最终JVM找不到处理方式而终止程序
+
+---
+
+**finally 代码块**
+
+**finally**：有一些特定的代码无论异常是否发生，都需要执行。另外，因为异常会引发程序跳转，导致有些语句执行不到。而finally就是解决这个问题的，在finally代码块中存放的代码都是一定会被执行的。
+
+什么时候的代码必须最终执行？
+
+当我们在try语句块中打开了一些物理资源(磁盘文件/网络连接/数据库连接等),我们都得在使用完之后,最终关闭打开的资源。
+
+**finally的语法:**
+
+ `try...catch....finally`: 自身需要处理异常,最终还得关闭资源。
+
+> 注意:finally不能单独使用。
+
+比如在我们之后学习的IO流中，当打开了一个关联文件的资源，最后程序不管结果如何，都需要把这个资源关闭掉。
+
+finally代码参考如下：
+
+~~~java
+public class TryCatchDemo4 {
+    public static void main(String[] args) {
+        try {
+            read("a.txt");
+        } catch (FileNotFoundException e) {
+            //抓取到的是编译期异常  抛出去的是运行期 
+            throw new RuntimeException(e);
+        } finally {
+            System.out.println("不管程序怎样，这里都将会被执行。");
+        }
+        System.out.println("over");
+    }
+    /*
+     *
+     * 我们 当前的这个方法中 有异常  有编译期异常
+     */
+    public static void read(String path) throws FileNotFoundException {
+        if (!path.equals("a.txt")) {//如果不是 a.txt这个文件 
+            // 我假设  如果不是 a.txt 认为 该文件不存在 是一个错误 也就是异常  throw
+            throw new FileNotFoundException("文件不存在");
+        }
+    }
+}
+~~~
+
+> 当只有在try或者catch中调用退出JVM的相关方法,此时finally才不会执行,否则finally永远会执行。
+
+---
+
+**自定义异常**
+
+要求：我们模拟注册操作，如果用户名已存在，则抛出异常并提示：亲，该用户名已经被注册。
+
+首先定义一个登陆异常类RegisterException：
+
+~~~java
+// 业务逻辑异常
+public class RegisterException extends Exception {
+    /**
+     * 空参构造
+     */
+    public RegisterException() {
+    }
+
+    /**
+     *
+     * @param message 表示异常提示
+     */
+    public RegisterException(String message) {
+        super(message);
+    }
+}
+~~~
+
+模拟登陆操作，使用数组模拟数据库中存储的数据，并提供当前注册账号是否存在方法用于判断。
+
+~~~java
+public class Demo {
+    // 模拟数据库中已存在账号
+    private static String[] names = {"bill","hill","jill"};
+   
+    public static void main(String[] args) {     
+        //调用方法
+        try{
+              // 可能出现异常的代码
+            checkUsername("bill");
+            System.out.println("注册成功");//如果没有异常就是注册成功
+        }catch(RegisterException e){
+            //处理异常
+            e.printStackTrace();
+        }
+    }
+
+    //判断当前注册账号是否存在
+    //因为是编译期异常，又想调用者去处理 所以声明该异常
+    public static boolean checkUsername(String uname) throws RegisterException{
+        for (String name : names) {
+            if(name.equals(uname)){//如果名字在这里面 就抛出登陆异常
+                throw new RegisterException("亲"+name+"已经被注册了！");
+            }
+        }
+        return true;
+    }
+}
+
+运行结果：
+cn.text3.RegisterException: 亲bill已经被注册了！
+	at cn.text3.Practice.checkUsername(Practice.java:28)
+	at cn.text3.Practice.main(Practice.java:15)
+~~~
+
+---
+
+## 8 多线程
 
 
 
@@ -3142,4 +3761,8 @@ Collections.sort(list, new Comparator<Student>() {
  <a name="继承内存分析">继承内存分析</a>
 
 ![](jpg/IMG_6191.jpg)
+
+<a name="异常产生过程解析">异常产生过程解析</a>
+
+![](jpg/IMG_6202.jpg)
 
