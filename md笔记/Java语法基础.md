@@ -3972,6 +3972,8 @@ synchronized(同步锁){
 
 同步锁:  对象的同步锁只是一个概念,可以想象为在对象上标记了一个锁
 
+> 在任何时候,最多允许一个线程拥有同步锁,谁拿到锁就进入代码块,其他的线程只能在外等着(BLOCKED)
+
 ```java
 public class Ticket implements Runnable{
     private int ticket = 30;
@@ -4008,7 +4010,15 @@ public class Ticket implements Runnable{
 }
 ```
 
+**2. 同步方法**
 
+使用`synchronized`修饰的方法，就叫做同步方法，保证A线程执行该方法的时候，其他线程只能在方法外等着
+
+```java
+public synchronized void method(){
+		可能会产生线程安全问题的代码
+}
+```
 
 
 
