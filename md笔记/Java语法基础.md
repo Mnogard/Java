@@ -3855,19 +3855,158 @@ class MyRunnable implements Runnable{
 
 ---
 
+### 8.2 线程安全
 
+**线程安全问题**
 
+我们通过一个案例，演示线程的安全问题：
+电影院要卖票，我们模拟电影院的卖票过程。假设要播放的电影是 “葫芦娃大战奥特曼”，本次电影的座位共100个(本场电影只能卖100张票)。我们来模拟电影院的售票窗口，实现多个窗口同时卖 “葫芦娃大战奥特曼”这场电影票(多个窗口一起卖这100张票)
+需要窗口，采用线程对象来模拟；需要票，Runnable接口子类来模拟
 
+```java
+//Ticket.java
+public class Ticket implements Runnable{
+    private int ticket = 30;
+    /*
+     * 执行卖票操作
+     */
+    @Override
+    public void run() {
+        //每个窗口卖票的操作
+        //窗口 永远开启
+        while (true) {
+            if (ticket > 0) {//有票 可以卖
+                //出票操作
+                //使用sleep模拟一下出票时间
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                // TODO Auto‐generated catch block
+                    e.printStackTrace();
+                }
+                //获取当前线程对象的名字
+                String name = Thread.currentThread().getName();
+                System.out.println(name + "正在卖:" + ticket--);
+            }else{
+                break;
+            }
+        }
+    }
 
+}
 
+//Demo.java
+public class Demo {
+    public static void main(String[] args) {
+        //创建线程任务对象
+        Ticket ticket = new Ticket();
+        //创建三个窗口对象
+        Thread t1 = new Thread(ticket,
+                "窗口1");
+        Thread t2 = new Thread(ticket,
+                "窗口2");
+        Thread t3 = new Thread(ticket,
+                "窗口3");
+        //同时卖票
+        t1.start();
+        t2.start();
+        t3.start();
+    }
+}
 
+运行结果：
+窗口1正在卖:30
+窗口2正在卖:29
+窗口3正在卖:28
+窗口2正在卖:26
+窗口1正在卖:25
+窗口3正在卖:27
+窗口1正在卖:24
+窗口3正在卖:22
+窗口2正在卖:23
+窗口1正在卖:21
+窗口3正在卖:20
+窗口2正在卖:19
+窗口3正在卖:18
+窗口1正在卖:17
+窗口2正在卖:16
+窗口1正在卖:14
+窗口3正在卖:15
+窗口2正在卖:13
+窗口1正在卖:12
+窗口3正在卖:12
+窗口2正在卖:11
+窗口1正在卖:10
+窗口3正在卖:9
+窗口2正在卖:8
+窗口1正在卖:7
+窗口3正在卖:6
+窗口2正在卖:5
+窗口3正在卖:4
+窗口1正在卖:4
+窗口2正在卖:3
+窗口1正在卖:2
+窗口3正在卖:1
+窗口2正在卖:0
+窗口1正在卖:-1
+```
 
+---
 
+> **线程同步**
+>
+> 1. 同步代码块
+>
+> 2. 同步方法
+> 3. 锁机制
 
+**1. 同步代码块**
 
+`synchronized` 关键字可以用于方法中的某个区块中，表示只对这个区块的资源实行互斥访问。
 
+```java
+synchronized(同步锁){
+		需要同步操作的代码
+}
+```
 
+同步锁:  对象的同步锁只是一个概念,可以想象为在对象上标记了一个锁
 
+```java
+public class Ticket implements Runnable{
+    private int ticket = 30;
+
+    Object lock = new Object();
+    /*
+     * 执行卖票操作
+     */
+    @Override
+    public void run() {
+        //每个窗口卖票的操作
+        //窗口 永远开启
+        while (true) {
+            synchronized (lock) {
+                if (ticket > 0) {//有票 可以卖
+                    //出票操作
+                    //使用sleep模拟一下出票时间
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        // TODO Auto‐generated catch block
+                        e.printStackTrace();
+                    }
+                    //获取当前线程对象的名字
+                    String name = Thread.currentThread().getName();
+                    System.out.println(name + "正在卖:" + ticket--);
+                }else{
+                    break;
+                }
+            }
+        }
+    }
+
+}
+```
 
 
 
